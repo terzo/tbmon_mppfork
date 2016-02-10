@@ -1,0 +1,124 @@
+#ifndef TBCONFIG_H
+#define TBCONFIG_H
+
+// standard header files
+#include <assert.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <map>
+#include <sstream>
+#include <stdlib.h>
+#include <string>
+#include <sys/stat.h>
+
+// root header files
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TTree.h>
+
+// tbmon header files
+class TbConfig;
+#include "dut.h"
+#include "Track.h"
+#include "event.h"
+#include "tbanalysis.h"
+#include "looper.h"
+#include "eventbuilder.h"
+
+using namespace std;
+enum logLevel_t {
+	kERROR, kINFO, kDEBUG, kDEBUG2, kDEBUG3
+};
+
+/*! \brief Central class which is instantiated only once and manages everything. Contains all configuration information and methods which process everything.
+ *
+ */
+class TbConfig {
+public:
+	TTree* tree;
+	TFile* infile;
+	char* name;
+	char* treeName;
+	list<int> idens;
+	map<int, string> simIdenNameMap;
+	map<int, string> simIdenNameMap_all;
+	list<char*> analysisnames;
+
+	//Flags etc.
+	char* tbslot;
+	bool isSimulation;
+	//bool fNeedSimTruth; //Naming convention: fNeed<builderName - "Builder">
+	//bool fNeedSimPixelEdep;
+
+	map<string, string> cmdLineExtras;
+	map<string, string> cmdLineExtras_help;
+	bool cmdLineExtras_tryset(string key, string val);
+	double cmdLineExtras_argGetter(string key, double defaultValue,
+			string describeText);
+	string cmdLineExtras_argGetter(string key, string defaultValue,
+			string describeText);
+	bool cmdLineExtras_argGetter(string key, bool defaultValue,
+			string describeText);
+
+	map<int, Event> events;
+	vector<int> runList;
+
+	//output
+	bool useAtlasStyle;
+	bool logToFile;
+	bool organizeOutput;
+	logLevel_t logLevel;
+	TFile* tfile;
+	char* dataPath;
+	char* simDataPath;
+	char* outPath;
+	char* plotExtension;
+	char* buildHistName(const char* analysisName, const char* histoName) const;
+	void setTitle(const char* analysisName, const char* histoName,
+			TH1* histo) const;
+	void saveToFile(const char* analysisName, const char* histoName,
+			TNamed* histo) const;
+	void drawToFile(const char* analysisName, const char* histoName,
+			const char* drawOpts, TNamed* h1, TNamed* h2 = NULL, TNamed* h3 =
+					NULL, TNamed* h4 = NULL) const;
+	void drawToFile(const char* analysisName, const char* histoName, TNamed* h1,
+			TNamed* h2 = NULL, TNamed* h3 = NULL, TNamed* h4 = NULL) const;
+	void drawToFile(const char* analysisName, const char* histoName,
+			const char* drawOpts, const vector<TNamed*>* hh) const;
+	void drawToFile(const char* analysisName, const char* histoName,
+			const vector<TNamed*>* hh) const;
+	void dumpToLisp(const char* analysisName, const char* histoName,
+			TH1D* histo) const;
+	void drawAndSave(const char* analysisName, const char* histoName,
+			TNamed* histo) const;
+	void drawAndSave(const char* analysisName, const char* histoName,
+			const char* drawOpts, TNamed* histo) const;
+	char* getOutStreamName(const char* analysis, const char* name) const;
+
+	//Data
+	int currentRun, firstRun, lastRun, triggerCount;
+	long int MaxNumOfTrigToBeProcPerRun;
+	int currentEntry;
+	int simCurrentEventNum;
+	Track* track;
+	char* simDataPath_subdir;
+	list<DUT*> dutList;
+	map<int, DUT*> dutMap;
+	void addDut(DUT* dut);
+	const DUT* getDut(int iden) const;
+	list<TbAnalysis*> analysis;
+	void addAnalysis(TbAnalysis* tba, const char* name, DUT* dut);
+	list<EventBuilder*> eventbuilders;
+	map<string, EventBuilder*> eventbuilders_map;
+	void addBuilder(EventBuilder* builder);
+	void makeRunList(const char* fileName, bool meta = false);
+	void makeRunList(int firstRun, int lastRun = -1);
+	void buildEvent();
+	TbConfig();
+	void loop();
+};
+
+#endif //TBCONFIG_H

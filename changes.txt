@@ -1,0 +1,71 @@
+list of changes introduced into trunk version started on 4.4.2014 (started from revision 223 and some minor style changes as well as something commented out that caused crashes (look in labbook) and changes in analyses and addition of botho analyses)
+
+tbconfig.cc
+	- extensively commented TbConfig::loop()
+	
+looper.h
+	- corrected comments and deleted old function declaration
+	(void processRuns(vector<int> runs)) that has no definition in looper.cc
+	anymore
+	
+looper.cc
+	- commented on old strange comments that do not seem to make sense anymore
+	with (old, delete->) in front of them
+	- commented initRun
+	- ls
+	
+	
+eubuildtrack.cc
+	- comment in buildEvent
+	- LOTS of comments in buildEvent
+!!!!	- in init function added 
+			gr_Alpha = new std::vector<double>;
+			gr_Beta  = new std::vector<double>;
+			gr_Gamma = new std::vector<double>;
+			gr_RotXYErr = new std::vector<double>;
+			gr_RotZXErr = new std::vector<double>;
+			gr_RotZYErr = new std::vector<double>;
+		before it could cause random crashed, because stuff was written to the
+		not initialised pointers
+	
+pixelmasker.cc
+	- comments in buildEvent
+	- changed col and row mistake and made consistent with corrected \
+	DUT::addMasks version
+	- changed debug output "< lvl1 <" to "<= lvl1 <=" and commented on it
+	
+dut.cc
+	- corrected col, row switch up
+
+hotpixelfinder.cc
+	- checkNoise() commented on why scale by (16.0/ (15-...)) seems unnecessary
+	- commented out that line
+	- in event() changed the lv1 condition to lv1Min <= lv1 <= lv1Max
+	- in init() added +1 to lv1Max in line 53 in the exec_lv1_text to paint \
+	lv1 cut criterion correctly
+	
+checkregion.cc
+	- changed indentations
+	- corrected (*mm).first and second and commented on it
+	- changed masking radius from 1.5 to 1.0
+	
+checkregion.h and checkregion.cc
+	- saved original versions into checkregion_original.h/cc and
+	wrote an extended version that takes the masking radius as a command
+	line argument with standard value 1.5
+	
+siteconfig.h
+	- commented out the line setting config.plotExtension to .eps and
+	added a line setting it to .none
+	
+driver.cc
+	- Added "-m" option in parseArgs method in order to set config.MaxNumOfTrigToBeProcPerRun, this was contained in Stefano's version, but  not in trunk
+	
+edgeefficiency.cc
+	- line 139 changed wrong "==" to "!="
+	
+dut.cc
+	- Added getName method
+
+tbutils
+	- Added getPixelX method

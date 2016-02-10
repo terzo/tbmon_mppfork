@@ -1,0 +1,3 @@
+make; ./setup -l myRunLists/eudetPPSmay2012/geoid69 -f -c eudetPPSAug2013FEI34; ./tbmon -l myRunLists/eudetPPSmay2012/geoid69 -f -org -c eudetPPSAug2013FEI34
+
+make; ./setup -s 1755 -f -c eudetPPSAug2013FEI4; ./tbmon -s 1755 -f -org -c eudetPPSAug2013FEI4

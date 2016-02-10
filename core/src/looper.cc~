@@ -1,0 +1,159 @@
+#include "looper.h"
+
+using namespace std;
+
+/* (old, delete?->)All the virtual functions are loops over the subRoutines
+ list, calling the same function on all the TbAnalysis* classes
+ in the list.
+ */
+void Looper::initRun(TbConfig &config) {
+	/*  calls initRun for all DUTs, EventBuilders and Analyses
+	(old, delete?->)Get the sync bool* corresponding to the current run.
+	 If syncMap is empty, make a bool* all true.
+	 */
+	if (config.logLevel >= kDEBUG3)
+		cout << "[ Looper ]: in initRun." << endl;
+	// call initRun(config.currentRun) for all DUTs in list config.dutList
+	for (list<DUT*>::iterator it = config.dutList.begin();
+			it != config.dutList.end(); it++) {
+		config.tfile->cd();
+		(*it)->initRun(config.currentRun);
+	}
+	// call initRun(config) for all EventBuilders in list config.eventbuilders
+	for (list<EventBuilder*>::iterator it = config.eventbuilders.begin();
+			it != config.eventbuilders.end(); it++) {
+		config.tfile->cd();
+		(*it)->initRun(config);
+	}
+	// call initRun(config) for all TbAnalysis in list config.analysis
+	for (list<TbAnalysis*>::iterator it = config.analysis.begin();
+			it != config.analysis.end(); it++) {
+		config.tfile->cd();
+		(*it)->initRun(config);
+	}
+	config.tfile->cd();
+	if (config.logLevel >= kDEBUG3)
+		cout << "[ Looper ]: Leaving in initRun." << endl;
+}
+
+void Looper::event(TbConfig &config) {
+	if (config.logLevel >= kDEBUG3)
+		cout << "[ Looper ]: in Event." << endl;
+	config.triggerCount++;
+	// Build the Event
+	config.buildEvent();
+	//call TbAnalysis::event
+	for (list<TbAnalysis*>::iterator it = config.analysis.begin();
+			it != config.analysis.end(); it++) {
+		// Call analysis methods
+		//Make sure the event has been buildt/ track params have been found
+		if (config.events[(*it)->iden].fBase == event::kGood) {
+			(*it)->event(config, config.events[(*it)->iden]);
+		}
+	}
+}
+void Looper::finalize(TbConfig &config) {
+	for (list<TbAnalysis*>::iterator it = config.analysis.begin();
+			it != config.analysis.end(); it++) {
+		(*it)->finalize(config);
+	}
+
+	for (list<EventBuilder*>::iterator it = config.eventbuilders.begin();
+			it != config.eventbuilders.end(); it++) {
+		(*it)->finalize(config);
+	}
+	cout << "Done looping over " << config.triggerCount << " triggers." << endl;
+}
+void Looper::finalizeRun(TbConfig &config) {
+	for (list<TbAnalysis*>::iterator it = config.analysis.begin();
+			it != config.analysis.end(); it++) {
+		(*it)->finalizeRun(config);
+	}
+	for (list<EventBuilder*>::iterator it = config.eventbuilders.begin();
+			it != config.eventbuilders.end(); it++) {
+		(*it)->finalizeRun(config);
+	}
+}
+void Looper::eventLoop(TbConfig &config) {
+	int nentries = config.tree->GetEntries();
+	int run_until_event;
+
+	run_until_event = nentries;
+
+	if (config.MaxNumOfTrigToBeProcPerRun != -1) {
+		if (config.MaxNumOfTrigToBeProcPerRun <= nentries) {
+			run_until_event = config.MaxNumOfTrigToBeProcPerRun;
+		} else {
+			cout << "MaxNumOfTrigToBeProcPerRun is set to "
+					<< config.MaxNumOfTrigToBeProcPerRun
+					<< " but there are only " << nentries
+					<< " triggers available in run " << config.currentRun
+					<< " This setting will be subsequently ignored." << endl;
+		}
+	};
+	//Loop over all events, note that skipping the first event is done with intention. It could contain junk.
+
+	for (config.currentEntry = 1; config.currentEntry < run_until_event;
+			config.currentEntry++) {
+		event(config);
+	}
+	if (config.MaxNumOfTrigToBeProcPerRun != -1) {
+		cout
+				<< "Maximum number of triggers to be processed in one run reached (first one is always ignored): "
+				<< config.currentEntry << endl;
+	};
+}
+
+void Looper::loop(TbConfig &config) {
+	char* fileName = new char[800];
+	struct stat statStruct;
+
+	for (std::vector<int>::const_iterator currentRun = config.runList.begin();
+			currentRun != config.runList.end(); currentRun++) {
+
+		//Does file exist in data path?
+		sprintf(fileName, "%stbtrack%i.root", config.dataPath, *currentRun);
+		if (stat(fileName, &statStruct) != 0) {
+			sprintf(fileName, "%stbtrack0%i.root", config.dataPath,
+					*currentRun);
+			if (stat(fileName, &statStruct) != 0) {
+				sprintf(fileName, "%stbtrack00%i.root", config.dataPath,
+						*currentRun);
+				if (stat(fileName, &statStruct) != 0) {
+					sprintf(fileName, "%stbtrack000%i.root", config.dataPath,
+							*currentRun);
+					if (stat(fileName, &statStruct) != 0) {
+						sprintf(fileName, "%stbtrack0000%i.root",
+								config.dataPath, *currentRun);
+						if (stat(fileName, &statStruct) != 0) {
+							sprintf(fileName, "%stbtrack00000%i.root",
+									config.dataPath, *currentRun);
+							if (stat(fileName, &statStruct) != 0) {
+								cout
+										<< "[ Looper ]; In loop(...): Can't find file for run"
+										<< *currentRun
+										<< " (tried 1 through 5 prepending 0s) - SKIPPING"
+										<< endl;
+								continue;
+							};
+						};
+					};
+				};
+			};
+		};
+		config.currentRun = *currentRun;
+
+		config.infile = new TFile(fileName);
+		config.tree = (TTree*) config.infile->Get(config.treeName);
+		config.tfile->cd();
+		if (config.logLevel >= kINFO)
+			cout << "Processing " << fileName << endl;
+		initRun(config);
+		eventLoop(config);
+		finalizeRun(config);
+	}
+	// test output introduced by Botho
+	cout << "dataPath = " << config.dataPath << endl;
+	finalize(config);
+	delete[] fileName;
+}

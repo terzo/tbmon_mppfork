@@ -1,0 +1,698 @@
+#include <tbconfig.h>
+
+using namespace std;
+
+void makeSureDirName(char* dirname) {
+	int index(0);
+	char last('/');
+	while (true) {
+		if (dirname[index] == '\0') {
+			if (last != '/') {
+				dirname[index] = '/';
+				dirname[index + 1] = '\0';
+			}
+			break;
+		}
+		last = dirname[index];
+		index++;
+	}
+}
+
+TbConfig::TbConfig() {
+	triggerCount = 0;
+	currentRun = 0;
+	firstRun = 0;
+	lastRun = 0;
+	currentEntry = 0;
+	simCurrentEventNum = 0;
+	MaxNumOfTrigToBeProcPerRun = -1;
+	tbslot = new char[800];
+	sprintf(tbslot, "notset");
+	isSimulation = false;
+	//fNeedSimPixelEdep = false;
+	//fNeedSimTruth= false;
+	logLevel = kINFO;
+	logToFile = false;
+	organizeOutput = false;
+	useAtlasStyle = false;
+	name = new char[800];
+	sprintf(name, "notset");
+	outPath = new char[800];
+	sprintf(outPath, "notset");
+	dataPath = new char[800];
+	sprintf(dataPath, "notset");
+	simDataPath = new char[800];
+	sprintf(simDataPath, "notset");
+	simDataPath_subdir = new char[800];
+	sprintf(simDataPath_subdir, "notset_inBuilder");
+	plotExtension = new char[800];
+	sprintf(plotExtension, "notset");
+	treeName = new char[800];
+	sprintf(treeName, "Track");
+}
+
+void TbConfig::makeRunList(const char* fileName, bool meta) {
+	std::string line;
+	std::ifstream fs(fileName);
+	if (!fs.is_open()) {
+		std::cout << "The runlist file '" << fileName
+				<< "' could not be opened!" << std::endl;
+		exit(-1);
+	}
+	char* pathName = new char[500];
+	strcpy(pathName, fileName);
+	int index(0), endPoint(0);
+	while (true) {
+		if (pathName[index] == '/') {
+			endPoint = index + 1;
+		}
+		if (pathName[index] == '\0') {
+			break;
+		}
+		index++;
+	}
+	pathName[endPoint] = '\0';
+	char *testFileName = new char[500];
+
+	while (true) {
+		getline(fs, line);
+		if (fs.eof()) {
+			break;
+		}
+		std::string::size_type found = line.find("#");
+		struct stat statStruct;
+		if (found == string::npos) {
+			//A new filename?
+			sprintf(testFileName, "%s%s", pathName, line.c_str());
+			if (stat(testFileName, &statStruct) == 0 and line.size() > 5) {
+				makeRunList(testFileName, true);
+			}
+			//Add a run
+			else {
+				istringstream iss(line.c_str());
+				int runnr;
+				iss >> runnr;
+				runList.push_back(runnr);
+			}
+		}
+	}
+	fs.close();
+	if (not meta) {
+		this->firstRun = runList.at(0);
+		this->lastRun = runList.at(runList.size() - 1);
+		//Only keep stuff after the last /
+		if (strcmp(name, "notset") == 0) {
+			int inpos = 0;
+			int outpos = 0;
+			while (true) {
+				name[outpos] = fileName[inpos];
+				inpos++;
+				outpos++;
+				if (fileName[inpos] == '/') {
+					outpos = 0;
+					inpos++;
+				}
+				if (fileName[inpos] == '\0') {
+					name[outpos] = '\0';
+					break;
+				}
+			}
+		}
+	}
+}
+void TbConfig::makeRunList(int firstRun, int lastRun) {
+	runList.clear();
+	this->firstRun = firstRun;
+	this->lastRun = lastRun;
+	if (lastRun == -1) {
+		if (strcmp(name, "notset") == 0) {
+			sprintf(name, "run%i", firstRun);
+		}
+		runList.push_back(firstRun);
+	} else {
+		if (strcmp(name, "notset") == 0) {
+			sprintf(name, "run%i-%i", firstRun, lastRun);
+		}
+		for (int run = firstRun; run <= lastRun; run++) {
+			runList.push_back(run);
+		}
+	}
+}
+
+bool TbConfig::cmdLineExtras_tryset(string key, string val) {
+	//Check if a key already is set. If it is not, set it to val, and return true.
+	//If it was already set, do not overwrite, but return false
+	map<string, string>::iterator find = cmdLineExtras.find(key);
+	if (find == cmdLineExtras.end()) {
+		//Not set
+		cmdLineExtras[key] = val;
+		return true;
+	} else
+		return false; //Already set
+}
+double TbConfig::cmdLineExtras_argGetter(string key, double defaultValue,
+		string describeText) {
+	if (logLevel >= kDEBUG) {
+		cout << "[ TbConfig ]; In \"double cmdLineExtras_argGetter()\"" << endl;
+	}
+
+	// Method used for getting/creating arguments of type "double".
+	// If it has already been set, only create help-text, and return the value it is set to
+	// If it has not been set, create help-text, set to default value, and return the default value
+	// This method exits on error.
+
+	//Description text
+	if (cmdLineExtras_help.find(key) == cmdLineExtras_help.end()) {
+		cmdLineExtras_help[key] = describeText;
+	} else if (logLevel >= kDEBUG) {
+		cout
+				<< "[ TbConfig ]; Warning in cmdLineExtras_argGetter(): Tried to set an argument (key = \""
+				<< key << "\") that has previously been created" << endl;
+		//exit(-1);
+	}
+
+	//Try to set default value, or read one that already exists
+	ostringstream ss1;
+	ss1 << defaultValue;
+	if (cmdLineExtras_tryset(key, ss1.str())) {
+		//Not previously set: Return default value
+		return defaultValue;
+	} else {
+		//Previously set: Parse!
+		istringstream ss2(cmdLineExtras[key]);
+		double retVal;
+		bool goodFlag = (ss2 >> retVal);
+		ss1.str(""); //Clear!
+		ss1 << retVal;
+		if (ss1.str().length() != cmdLineExtras[key].length())
+			goodFlag = false;
+		if (!goodFlag) {
+			//Not a double
+			cout
+					<< "[ TbConfig ]; Error in cmdLineExtras_doubleArgGetter(): Input \""
+					<< cmdLineExtras[key] << "\" for key \"" << key
+					<< "\" not a double (or you used extra 0s)" << endl;
+			exit(-1);
+		}
+		return retVal;
+	}
+}
+string TbConfig::cmdLineExtras_argGetter(string key, string defaultValue,
+		string describeText) {
+	// Method used for getting/creating arguments of type "string".
+	// !!! BIG FAT WARNING THAT *WILL* BITE IF YOU DON'T TAKE CARE !!! :
+	// Make sure to call this function as
+	// cmdLineExtras_argGetter ("...", string("..."), " ... ") and not as
+	// cmdLineExtras_argGetter ("...",        "..." , " ... "), else
+	// bool TbConfig::cmdLineExtras_argGetter(string, bool, string)
+	//    will be chosen by the compiler, bad things will happen,
+	//    dogs and cats will be living together etc. !!!
+	if (logLevel >= kDEBUG) {
+		cout << "[ TbConfig ]; In \"string cmdLineExtras_argGetter()\"" << endl;
+	}
+
+	//Description text
+	if (cmdLineExtras_help.find(key) == cmdLineExtras_help.end()) {
+		cmdLineExtras_help[key] = describeText;
+	} else if (logLevel >= kDEBUG) {
+		cout
+				<< "[ TbConfig ]; Warning in cmdLineExtras_argGetter(): Tried to set an argument (key = \""
+				<< key << "\") that has previously been created" << endl;
+		//exit(-1);
+	}
+
+	//Try to set default value, or read one that already exists
+	if (cmdLineExtras_tryset(key, defaultValue)) {
+		//Not previously set: Return default value
+		return defaultValue;
+	} else {
+		//Previously set
+		return cmdLineExtras[key];
+	}
+}
+bool TbConfig::cmdLineExtras_argGetter(string key, bool defaultValue,
+		string describeText) {
+	// Method used for getting/creating arguments of type "bool".
+	if (logLevel >= kDEBUG) {
+		cout << "[ TbConfig ]; In \"bool cmdLineExtras_argGetter()\"" << endl;
+	}
+
+	//Description text
+	if (cmdLineExtras_help.find(key) == cmdLineExtras_help.end()) {
+		cmdLineExtras_help[key] = describeText;
+	} else if (logLevel >= kDEBUG) {
+		cout
+				<< "[ TbConfig ]; Warning in cmdLineExtras_argGetter(): Tried to set an argument (key = \""
+				<< key << "\") that has previously been created" << endl;
+		//exit(-1);
+	}
+
+	string defaultValueString = defaultValue ? "True" : "False";
+
+	//Try to set default value, or read one that already exists
+	if (cmdLineExtras_tryset(key, defaultValueString)) {
+		//Not previously set: Return default value
+		return defaultValue;
+	} else {
+		//Previously set
+		if (cmdLineExtras[key] == "True") {
+			return true;
+		} else if (cmdLineExtras[key] == "False") {
+			return false;
+		} else {
+			cout
+					<< "[ TbConfig ] Error in cmdLineExtras_argGetter(): A bool variable "
+					<< " such as \"" << key << "\"can only be"
+					<< "\"True\" or \"False\"" << endl;
+			exit(-1);
+		}
+	}
+}
+
+void TbConfig::addAnalysis(TbAnalysis* tba, const char* name, DUT* dut) {
+	bool doAdd(false);
+	if (analysisnames.size() == 0) {
+		doAdd = true;
+	}
+	for (list<char*>::iterator it = analysisnames.begin();
+			it != analysisnames.end(); it++) {
+		if (strcmp(name, (*it)) == 0) {
+			doAdd = true;
+		}
+	}
+	if (doAdd) {
+		tba->iden = dut->getDUTid();
+		tba->setName(name);
+		analysis.push_back(tba);
+	}
+}
+
+const DUT* TbConfig::getDut(int iden) const {
+	map<int, DUT*>::const_iterator it = dutMap.find(iden);
+	if (it == dutMap.end()) {
+		return (NULL);
+	}
+	return ((*it).second);
+}
+
+void TbConfig::addDut(DUT* dut) {
+	bool addDUT(false);
+	if (idens.size() == 0) {
+		addDUT = true;
+	}
+	for (list<int>::iterator it = idens.begin(); it != idens.end(); it++) {
+		if (dut->getDUTid() == (*it)) {
+			addDUT = true;
+		}
+	}
+	if (addDUT) {
+		if (logLevel >= kINFO)
+			cout << "Adding DUT with iden " << dut->getDUTid() << endl;
+		dutList.push_back(dut);
+		dutMap[dut->getDUTid()] = dut;
+	}
+}
+
+void TbConfig::addBuilder(EventBuilder* builder) {
+	if (logLevel >= kDEBUG) {
+		cout << "[ TbConfig ]; Adding builder named " << builder->name << endl;
+	}
+	eventbuilders.push_back(builder);
+	//Check if this name is already added
+	map<string, EventBuilder*>::iterator it = eventbuilders_map.find(
+			builder->name);
+	if (it != eventbuilders_map.end()) {
+		cout
+				<< "[ TbConfig ]; Error: in addBuilder, tried to add a second builder named "
+				<< builder->name << endl;
+		exit(-1);
+	}
+	eventbuilders_map[builder->name] = builder;
+}
+
+/**
+ * clear all events in events map
+ * run initEvent() of each EventBuilder on events map
+ * run buildEvent() of each EventBuilder on each event
+ */
+void TbConfig::buildEvent() {
+	if (logLevel >= kDEBUG3)
+		cout << "[ Config ]: in buildEvent." << endl;
+	// Run event builders
+	//Clear instead of recreate to speed things up a bit
+	for (list<DUT*>::iterator it = dutList.begin(); it != dutList.end(); it++) {
+		//Clear instead of recreate to speed things up a bit
+		events[(*it)->getDUTid()].clear();
+	}
+	for (list<EventBuilder*>::iterator iit = eventbuilders.begin();
+			iit != eventbuilders.end(); iit++) {
+		(*iit)->initEvent((*this), events);
+	}
+	for (map<int, Event>::iterator it = events.begin(); it != events.end();
+			it++) {
+		for (list<EventBuilder*>::iterator iit = eventbuilders.begin();
+				iit != eventbuilders.end(); iit++) {
+			(*iit)->buildEvent((*it).second, events, (*this));
+		}
+	}
+	if (logLevel >= kDEBUG3)
+		cout << "[ Config ]: Leaving buildEvent." << endl;
+}
+
+/**
+ * check all pathes for validity
+ * check if there are DUTs defined
+ * open output root file (config.tfile)
+ * run init() for each EventBuilder and Analysis
+ * check if there are runs and analyses defined
+ * check plot extension and set stdout to logfile (if requested by -f parameter)
+ * output cmdLineExtras
+ * create Looper and start loop() which steers the main event processing
+ * after loop() close output root file
+ */
+void TbConfig::loop() {
+	struct stat statStruct;
+	bool doQuit = false;
+	//Make sure site config is good
+	makeSureDirName(dataPath);
+	makeSureDirName(simDataPath);
+	makeSureDirName(outPath);
+	if (stat(dataPath, &statStruct) != 0) {
+		std::cout << "Datapath (" << dataPath << ") does not appear to exist."
+				<< std::endl;
+		doQuit = true;
+	}
+	if (isSimulation && stat(simDataPath, &statStruct) != 0) {
+		std::cout << "Datapath (" << simDataPath
+				<< ") does not appear to exist." << std::endl;
+		doQuit = true;
+	}
+	if (stat(outPath, &statStruct) != 0) {
+		std::cout << "Outpath (" << outPath << ") does not appear to exist."
+				<< std::endl;
+		doQuit = true;
+	}
+	
+	// check if there is a DUT in the configuration
+	if (dutList.size() < 1) {
+		std::cout
+				<< "Cannot find any configured modules. Unknown device passed with \'-i\'? Nothing to do."
+				<< std::endl;
+		doQuit = true;
+	}
+
+	// open output file outPath(/)name.root and save pointer in config.tfile
+	char* rootFileName = new char[500];
+	sprintf(rootFileName, "%s%s.root", outPath, name);
+	tfile = new TFile(rootFileName, "RECREATE");
+
+	// initialize all event builders and analyses (init functions)
+	for (list<EventBuilder*>::iterator it = eventbuilders.begin();
+			it != eventbuilders.end(); it++) {
+		tfile->cd();
+		(*it)->init(*this);
+		if (logLevel >= kINFO) {
+			cout << "Initialized EventBuilder \"" << (*it)->name << "\""
+					<< endl;
+		}
+	}
+	for (list<TbAnalysis*>::iterator tba = analysis.begin();
+			tba != analysis.end(); tba++) {
+		tfile->cd();
+		(*tba)->init(*this);
+		if (logLevel >= kINFO)
+			cout << "Initialized analysis \"" << (*tba)->basename
+					<< "\" for iden " << (*tba)->iden << endl;
+	}
+	tfile->cd();
+	
+	// check if there are runs and analyses defined
+	if (analysis.size() < 1) {
+		std::cout
+				<< "No initialized analyses. Bad analysis name passed with \'-a\'? Nothing to do."
+				<< std::endl;
+		doQuit = true;
+	}
+	if (runList.size() < 1) {
+		std::cout << "No runs in run list, Nothing to do." << std::endl;
+		doQuit = true;
+	}
+	
+	// quit in case any of the above conditions are not met
+	if (doQuit) {
+		std::cout << "Initialization or configuration has failed. Quitting."
+				<< std::endl;
+		delete tfile;
+		tfile = 0;
+		exit(-1);
+	}
+	
+	//Allocate space for events
+	for (list<DUT*>::iterator it = dutList.begin(); it != dutList.end(); it++) {
+		events[(*it)->getDUTid()] = Event((*it));
+	}
+	
+	// set default plot extension to .eps if nothing else is defined
+	if (strcmp(plotExtension, "notset") == 0) {
+		sprintf(plotExtension, ".eps");
+	}
+	if (plotExtension[0] != '.') {
+		char* tmp = new char[800];
+		strcpy(tmp, plotExtension);
+		sprintf(plotExtension, ".%s", tmp);
+		delete tmp;
+	}
+	
+	// redirect stdout (standard output) to logfile, if requested (via -f parameter)
+	if (logToFile) {
+		char* logName = new char[500];
+		sprintf(logName, "%s%s.log", outPath, name);
+		cout << "Output is being redirected to " << logName << endl;
+		freopen(logName, "w", stdout);
+	}
+
+	//Output current list of cmdLineExtras
+	bool badArgs = false;
+	cout << "[ TbConfig ]; Parameter arguments pushed onto cmdLineExtras:"
+			<< endl << "\t" << setw(35) << left << "KEY" << setw(25) << left
+			<< "VALUE" << "DESCRIPTION" << endl;
+	for (map<string, string>::iterator it = cmdLineExtras.begin();
+			it != cmdLineExtras.end(); it++) {
+		cout << "\t" << setw(35) << left << (*it).first << setw(25) << left
+				<< (*it).second;
+		map<string, string>::iterator searcher = cmdLineExtras_help.find(
+				(*it).first);
+		if (searcher != cmdLineExtras_help.end()) {
+			cout << (*searcher).second << endl;
+		} else {
+			cout << "(No description found -- ERROR)" << endl;
+			badArgs = true;
+		}
+	}
+	if (badArgs) {
+		cout << "Error: Unrecognized \"-P:key val\" argument(s)" << endl;
+		exit(-1);
+	}
+
+	// create Looper instance
+	Looper* looper = new Looper();
+	// looper will loop over event building and analyses for all events
+	looper->loop(*this);
+	// close output file
+	tfile->Close();
+}
+ 
+void TbConfig::saveToFile(const char* analysisName, const char* histoName,
+		TNamed* histo) const {
+	tfile->cd();
+	char* fullName = new char[500];
+	if (organizeOutput) {
+		tfile->mkdir(analysisName);
+		tfile->cd(analysisName);
+		sprintf(fullName, "%s", histoName);
+	} else {
+		sprintf(fullName, "%s-%s", analysisName, histoName);
+	}
+	for (int ii = 0; ii < 500; ii++) { // Histo not callable from the cint cli if '-' in the name
+		if (fullName[ii] == '-') {
+			fullName[ii] = '_';
+		}
+		if (fullName[ii] == '\0') {
+			break;
+		}
+	}
+	histo->SetName(fullName);
+	histo->Write(fullName);
+	delete[] fullName;
+}
+
+// changed by Botho (2014-06-17) added overloaded saveToFile version with TObject *histo
+void TbConfig::saveToFile(const char* analysisName, const char* histoName,
+		TObject* histo) const {
+	tfile->cd();
+	char* fullName = new char[500];
+	if (organizeOutput) {
+		tfile->mkdir(analysisName);
+		tfile->cd(analysisName);
+		sprintf(fullName, "%s", histoName);
+	} else {
+		sprintf(fullName, "%s-%s", analysisName, histoName);
+	}
+	for (int ii = 0; ii < 500; ii++) { // Histo not callable from the cint cli if '-' in the name
+		if (fullName[ii] == '-') {
+			fullName[ii] = '_';
+		}
+		if (fullName[ii] == '\0') {
+			break;
+		}
+	}
+//	histo->SetName(fullName);
+	histo->Write(fullName);
+	delete[] fullName;
+}
+
+void TbConfig::setTitle(const char* analysisName, const char* histoName,
+		TH1* histo) const {
+	char hTitle[600];
+	sprintf(hTitle, "%s-%s-%s", name, analysisName, histoName);
+	histo->SetTitle(hTitle);
+}
+
+void TbConfig::drawAndSave(const char* analysisName, const char* histoName,
+		TNamed* histo) const {
+	drawToFile(analysisName, histoName, histo);
+	saveToFile(analysisName, histoName, histo);
+}
+void TbConfig::drawAndSave(const char* analysisName, const char* histoName,
+		const char* drawOpts, TNamed* histo) const {
+	drawToFile(analysisName, histoName, drawOpts, histo);
+	saveToFile(analysisName, histoName, histo);
+}
+
+char* TbConfig::buildHistName(const char* analysisName,
+		const char* histoName) const {
+	char* fileName = new char[600];
+	sprintf(fileName, "%s%s-%s-%s%s", outPath, name, analysisName, histoName,
+			plotExtension);
+	return fileName;
+}
+
+void TbConfig::drawToFile(const char* analysisName, const char* histoName,
+		TNamed* h1, TNamed* h2, TNamed* h3, TNamed* h4) const {
+	drawToFile(analysisName, histoName, "", h1, h2, h3, h4);
+}
+void TbConfig::drawToFile(const char* analysisName, const char* histoName,
+		const char* drawOpts, TNamed* h1, TNamed* h2, TNamed* h3,
+		TNamed* h4) const {
+	std::string tempExtension;
+	tempExtension = plotExtension;
+	if (tempExtension != ".none") {
+		char* fileName = buildHistName(analysisName, histoName);
+		TCanvas* canvas = new TCanvas();
+		canvas->cd();
+		
+		// margins added by Botho
+		canvas->SetRightMargin(0.6);
+		canvas->SetLeftMargin(0.6);
+		canvas->SetBottomMargin(0.6);
+		
+		string classname = h1->ClassName();
+		if (useAtlasStyle) {
+			if (classname == "TH2" || classname == "TH2F"
+					|| classname == "TH2D") {
+				canvas->SetRightMargin(0.15);
+			}
+		}
+		h1->Draw(drawOpts);
+		if (h2 != NULL) {
+			h2->Draw("same");
+		}
+		if (h3 != NULL) {
+			h3->Draw("same");
+		}
+		if (h4 != NULL) {
+			h4->Draw("same");
+		}
+		canvas->SaveAs(fileName, "QQ");
+		delete canvas;
+		delete[] fileName;
+	}
+}
+void TbConfig::drawToFile(const char* analysisName, const char* histoName,
+		const char* drawOpts, const vector<TNamed*>* hh) const {
+	char* fileName = buildHistName(analysisName, histoName);
+	std::string tempExtension;
+	tempExtension = plotExtension;
+	if (tempExtension != ".none") {
+		TCanvas* canvas = new TCanvas();
+		canvas->cd();
+		
+		// margins added by Botho
+		canvas->SetRightMargin(0.6);
+		canvas->SetLeftMargin(0.6);
+		canvas->SetBottomMargin(0.6);
+
+		for (vector<TNamed*>::const_iterator it = hh->begin(); it != hh->end();
+				it++) {
+			if (it == hh->begin()) {
+				string classname = (*it)->ClassName();
+				if (useAtlasStyle) {
+					if (classname == "TH2" || classname == "TH2F"
+							|| classname == "TH2D") {
+						canvas->SetRightMargin(0.15);
+					}
+				}
+				(*it)->Draw(drawOpts);
+			} else {
+				(*it)->Draw("SAME");
+			}
+		}
+		canvas->SaveAs(fileName, "QQ");
+		delete canvas;
+		delete[] fileName;
+	}
+}
+void TbConfig::drawToFile(const char* analysisName, const char* histoName,
+		const vector<TNamed*>* hh) const {
+	drawToFile(analysisName, histoName, "", hh);
+}
+void TbConfig::dumpToLisp(const char* analysisName, const char* histoName,
+		TH1D* histo) const {
+	ofstream plot;
+	char* outname = new char[600];
+	sprintf(outname, "%s%s-%s-%s.txt", outPath, name, analysisName, histoName);
+	plot.open(outname);
+	plot << "(" << ":x-min " << histo->GetXaxis()->GetXmin() << " :x-max "
+			<< histo->GetXaxis()->GetXmax() << " :x-step "
+			<< histo->GetBinWidth(0) << ")" << endl;
+	plot << "#(";
+	for (int ii = 1; ii <= histo->GetNbinsX(); ii++) {
+		plot << histo->GetBinContent(ii) << " ";
+	}
+	plot << ")" << endl;
+}
+char* TbConfig::getOutStreamName(const char* analysisName,
+		const char* streamName) const {
+	char* oName = new char[800];
+	sprintf(oName, "%s%s-%s-%s.txt", outPath, name, analysisName, streamName);
+	return (oName);
+}
+
+void TbConfig::clear()
+{
+   analysis.clear();
+   eventbuilders.clear();
+   eventbuilders_map.clear();
+   triggerCount=0;
+   cmdLineExtras.clear();
+   cmdLineExtras_help.clear();
+   dutList.clear();  
+}
+
+void TbConfig::reset()
+{
+   analysis.clear();
+   triggerCount=0;
+   cmdLineExtras.clear();
+   cmdLineExtras_help.clear(); 
+}

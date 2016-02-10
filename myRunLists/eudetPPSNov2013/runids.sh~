@@ -1,0 +1,25 @@
+#! /bin/bash
+
+echo "starting script"
+
+echo "process geoid163"
+#./setup -l myRunLists/eudetPPSNov2013/geoid163 -f -c eudetPPSNov2013FEI34
+./tbmon -l myRunLists/eudetPPSNov2013/geoid163 -f -org -c eudetPPSNov2013FEI34
+
+echo "process geoid164"
+#./setup -l myRunLists/eudetPPSNov2013/geoid164 -f -c eudetPPSNov2013FEI34
+./tbmon -l myRunLists/eudetPPSNov2013/geoid164 -f -org -c eudetPPSNov2013FEI34
+
+echo "process geoid165"
+./setup -l myRunLists/eudetPPSNov2013/geoid165 -f -c eudetPPSNov2013FEI34
+./tbmon -l myRunLists/eudetPPSNov2013/geoid165 -f -org -c eudetPPSNov2013FEI34
+
+echo "process geoid166"
+./setup -l myRunLists/eudetPPSNov2013/geoid166 -f -c eudetPPSNov2013FEI34
+./tbmon -l myRunLists/eudetPPSNov2013/geoid166 -f -org -c eudetPPSNov2013FEI34
+
+echo "process geoid167"
+./setup -l myRunLists/eudetPPSNov2013/geoid167 -f -c eudetPPSNov2013FEI34
+./tbmon -l myRunLists/eudetPPSNov2013/geoid167 -f -org -c eudetPPSNov2013FEI34
+
+echo "script finished"

@@ -1,0 +1,195 @@
+#ifndef DUT_H
+#define DUT_H
+
+// standard header files
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
+
+// tbmon header files
+#include "totcalib.h"
+#include "totcalib_fei3_turbodaq.h"
+#include "totcalib_fei3_usbpix_converted.h"
+#include "totcalib_fei3_turbodaq_converted_from_tot_file.h"
+#include "etacorrections.h"
+
+/*! \brief Contains all data belonging to one DUT
+ *
+ * Contains all data belonging to one DUT and provides the methods necessary to add these data and access them.
+ */
+class DUT {
+
+private:
+
+	// sensor/frontend properties
+	double pitchX; ///< pitch in x-direction in central region
+	double pitchY; ///< pitch in y-direction in central region
+	double epitchX; ///< pitch in x-direction in edge region
+	double epitchY; ///< pitch in y-direction in edge region
+	double thickness; ///< sensor thickness
+	int ncols; ///< total number of columns
+	int nrows; ///< total number of rows
+	int maxCol; ///< highest column number
+	int maxRow; ///< highest row number
+	int skipRows; ///<
+	int skipCols; ///<
+	int numElec; ///<
+
+	// processing information
+	double matchX; ///< matching distance in x
+	double matchY; ///< matching distance in y
+	double refLimitX; ///< Limit for X referencing in units of the column size
+	double refLimitY; ///< Limit for Y referencing in units of the row size
+	double signal0;   ///< Expected signal for a particle entering at 0deg
+
+	// administrative information
+	int iden; ///< DUT number
+	const char* name; ///< DUT name
+
+	//
+	void addMask(int col, int row);
+	//
+	void addMaskedPixel(int col, int row, int type);
+	//
+	void resetAngles();
+
+	/***************additional properties*********************/
+
+	ToTCalib* totcalib; ///< instance of specialized (depends on FE, data taking system and file conversion) ToT/Charge conversion class - contains data and methods
+	void setToTcalib(ToTCalib* totcalibobject) {
+		if(totcalib==NULL){
+			this->totcalib = totcalibobject;
+		} else {
+			delete(this->totcalib);
+			this->totcalib = totcalibobject;
+		}
+	};
+
+public:
+
+	std::vector<std::pair<int, int> > masks;
+	int maskedpixels[82][338]; // sensor is shifted on one right and up. Pixel (0,0) is equal maskpixelss[1][1];
+
+	double bias;
+
+	double anglePhiFromGEAR;
+	double angleEtaFromGEAR;
+	double anglePhiFromAlignment;
+	double angleEtaFromAlignment;
+	double anglePhiCalculated;
+	double angleEtaCalculated;
+	bool hasAnglesFromReco;
+	bool anglesCalculated;
+	int lv1Min, lv1Max;
+
+	//Calibs
+	EtaCorrections ecorrs;
+
+	/****************************constructors***************************************************/
+
+	DUT(const char* module_name, int iden, int numElec, double pitchX,
+			double pitchY, double epitchX, double epitchY, int ncols, int nrows,
+			int maxCol, int maxRow, int skipCols, int skipRows, double matchX,
+			double matchY, double refLimitX, double refLimitY,
+			double thickness = 250e-6, double signal0 = -1);
+	DUT(const char* module_name, int iden, int numElec);
+	DUT();
+
+	/****************************sensor/FE properties setters and getters***********************/
+
+	double getPitchX() const {
+		return (pitchX);
+	}
+	double getPitchY() const {
+		return (pitchY);
+	}
+	double getePitchX() const {
+		return (epitchX);
+	}
+	double getePitchY() const {
+		return (epitchY);
+	}
+	int getNcols() const {
+		return (ncols);
+	}
+	int getNrows() const {
+		return (nrows);
+	}
+	int getMaxCol() const {
+		return (maxCol);
+	}
+	int getMaxRow() const {
+		return (maxRow);
+	}
+	int getSkipCols() const {
+		return (skipCols);
+	}
+	int getSkipRows() const {
+		return (skipRows);
+	}
+	double getThickness() const {
+		return (thickness);
+	}
+	double setSignal0(double sig0) {
+		signal0 = sig0;
+	}
+	double getSignal0();
+	int getNumElec() const {
+		return numElec;
+	}
+
+	/****************************processing information setters and getters********************/
+
+	double getMatchX() const {
+		return (matchX);
+	}
+	double getMatchY() const {
+		return (matchY);
+	}
+	double getRefLimitX() const {
+		return (refLimitX);
+	}
+	double getRefLimitY() const {
+		return (refLimitY);
+	}
+
+	/****************************administrative properties setters and getters***********************/
+
+	int getDUTid() const {
+		return iden;
+	}
+
+	/****************************additional properties setters and getters***************************/
+
+	// set level 1 range within which a hit is considered "okay"
+	void lv1Range(int min, int max);
+
+	//
+	void addMasks(const char* file);
+	//
+	void addMaskedPixels(const char* file, int type);
+
+	// adds tot calibration file (first checks whether it exists and tries to determine the type)
+	void addToTCalib(const std::string & filename, std::string type = "determine");
+	//
+	double q(const double& tot, const int& col = -1, const int&row = -1) {
+		return totcalib->q((int) tot, col, row);
+	}
+
+	/****************************additional methods*************************************************/
+
+	// initialize run
+	void initRun(int currentRun);
+
+	ToTCalib* getToTcalib() const {
+		return totcalib;
+	}
+
+	;
+};
+
+#endif //DUT_H

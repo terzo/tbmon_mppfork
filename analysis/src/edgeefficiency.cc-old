@@ -1,0 +1,429 @@
+#include "edgeefficiency.h"
+#include "clusters.h"
+#include "TF1.h"
+#include "TMath.h"
+#include "TCanvas.h"
+#include "TGraphAsymmErrors.h"
+#include "TPaveStats.h"
+#include "TStyle.h"
+#include "TPaletteAxis.h"
+#include "TROOT.h"
+#include <assert.h>
+
+
+void EdgeEfficiency::init(TbConfig &config){
+
+  const DUT* dut = config.getDut(this->iden);
+  double pitchX = dut->getPitchX();
+  double pitchY = dut->getPitchY();
+  int nCols = dut->getNcols();
+  int nRows = dut->getNrows();
+
+  nTracks = 0;
+  nTracksEdge = 0;
+  nHitsEdge = 0;
+
+  h_trackMapEdge = new TH2D("", "Track Map Edge Tracks;Column;Row", nCols+4, -2, nCols+2, nRows, 0, nRows);
+  h_hitMapEdge = new TH2D("", "Hit Map Edge Tracks;Column;Row", nCols+4, -2, nCols+2, nRows, 0, nRows);
+  h_anyHitMapEdge = new TH2D("", "Any Hit Map Edge;Column;Row", nCols, 0, nCols, nRows, 0, nRows);
+  h_trackPixelMapEdge = new TH2D("", "Track Pixel Map Edge;Long side [#mum];Short Side[#mum]", TMath::Nint(pitchX)*2, 0, pitchX*2, TMath::Nint(pitchY)*2, 0, pitchY*2);
+  h_hitPixelMapEdge = new TH2D("", "Hit Pixel Map Edge;Long side [#mum];Short Side[#mum]", TMath::Nint(pitchX)*2, 0, pitchX*2, TMath::Nint(pitchY)*2, 0, pitchY*2);
+
+}
+
+
+void EdgeEfficiency::event(const TbConfig &config, const Event &event){
+
+  //Check that track has passed all cuts
+  if( event.fTrack != event::kGood) { TBALOG (kDEBUG3) << "Event did not pass all cuts" << endl; return; }
+  //Check that clusters have been made successfully
+  if( event.fClusters != event::kGood) { TBALOG (kDEBUG3) << "Clusters not present in event" << endl; return; }
+  // Are we in a good region of the chip?
+  // Cannot use standard function as it also is entangled with 
+  // masked pixels and will block the edge, remove FBK-172 by hand instead
+  // what do about this in a general case??? (BJD)
+  if(strcmp(config.tbslot, "may2009") == 0 or strcmp(config.tbslot, "may2009old1") == 0 ) {
+    if(event.dut->iden==172) {
+      if((event.trackY+0.5*event.dut->getPitchY())>98*event.dut->getPitchY() and 
+	 (event.trackY+0.5*event.dut->getPitchY())<142*event.dut->getPitchY()) {
+	return;
+      }
+    }
+  }
+  
+  nTracks++;
+
+  TBALOG(kDEBUG2) << "Event: " << config.currentEntry << " Run: "<< config.currentRun << endl;
+  TBALOG(kDEBUG2) << "Good track." << endl;
+  
+  // Are we *not* in the central region on the chip? 
+  if( event.fTrackCentralRegion == event::kGood) { TBALOG (kDEBUG3) << "Track in central region of chip" << endl; return; }
+
+  TBALOG(kDEBUG2) << "Edge track, col = " << tbutils::getCol(event.trackX, event) << " row = " << tbutils::getRow(event.trackY, event) << endl;
+  
+  // Make sure we are not too far off the sensor in the long (X) direction for edge studies
+  // (for the X edge we want to include half a pixel out)  
+  if( event.trackX < -1.0*event.dut->getPitchX() ) { return; }
+  // skip pixel on the high side for now
+  if( event.trackX >  1.0*event.dut->getPitchX() ) { return; }
+  // The edge in Y (ganged- and inter-ganged pixels) should still be ignored
+  if( (event.trackY + 0.5*event.dut->getPitchY()) < (event.dut->getPitchY()*event.dut->getSkipRows()) ) { return; }
+  if( (event.trackY + 0.5*event.dut->getPitchY()) > (event.dut->getPitchY()*(event.dut->getNrows() - event.dut->getSkipRows())) ) { return; }
+  
+  // Count the tracks
+  nTracksEdge++;
+  
+  TBALOG(kDEBUG2) << "Event: " << config.currentEntry << " Run: "<< config.currentRun << endl;
+  TBALOG(kDEBUG2) << "Accepted track." << endl;
+  
+  // plot the position of *any* single hits
+  for( vector<PllHit*>::const_iterator i = event.hits.begin(); i != event.hits.end(); ++i) {
+    if((*i)->iden != this->iden) continue;
+    h_anyHitMapEdge->Fill((*i)->col,(*i)->row);
+  }
+  
+  // Fill the sensor and pixel map
+  // (note the special case for the edge since it reaches outside the sensor area)
+  {
+    float col = (event.trackX + 0.5*event.dut->getPitchX()) / event.dut->getPitchX();
+    float row = (event.trackY + 0.5*event.dut->getPitchY()) / event.dut->getPitchY();
+    h_trackMapEdge->Fill( col, row );
+    // to get the edge distance 
+    h_trackPixelMapEdge->Fill( tbutils::getTrackTwoPixelEdgeDistance(event.trackX+event.dut->getPitchX(),event.dut->getPitchX()), tbutils::getTrackTwoPixelEdgeDistance(event.trackY+event.dut->getPitchY(),event.dut->getPitchY()) );
+  }
+  
+  // Are there any hits in the DUT?
+  if( event.hits.size() > 0 ) { TBALOG(kDEBUG2) << "Found hit in DUT!" << endl; }
+  
+  // Look for matched clusters
+  if( cluster::getMatched( event.clusters, event ) == -1 ) { return; }
+  TBALOG(kDEBUG2) << "Found matching cluster!" << endl; 
+  
+  nHitsEdge++;
+  {
+    float col =  (event.trackX + 0.5*event.dut->getPitchX()) / event.dut->getPitchX();
+    float row =  (event.trackY + 0.5*event.dut->getPitchY()) / event.dut->getPitchY();
+    h_hitMapEdge->Fill( col, row ); 
+    h_hitPixelMapEdge->Fill( tbutils::getTrackTwoPixelEdgeDistance(event.trackX+event.dut->getPitchX(),event.dut->getPitchX()), tbutils::getTrackTwoPixelEdgeDistance(event.trackY+event.dut->getPitchY(),event.dut->getPitchY()) );
+  }
+  
+}
+
+
+void EdgeEfficiency::finalize(const TbConfig &config){
+
+  TBALOG(kINFO) << " Tracks:             " << nTracks << endl;
+  TBALOG(kINFO) << " Edge tracks:        " << nTracksEdge << endl;
+  TBALOG(kINFO) << " Edge tracks w/ hit: " << nHitsEdge << endl;
+
+  //TStyle* style = (TStyle*)gStyle->Clone("curstyle");
+  //tbutils::HistStyle();
+
+  config.drawAndSave(name, "tracksedge", "colz", h_trackMapEdge);
+  config.drawAndSave(name, "hitsanyedge", "colz", h_anyHitMapEdge);
+  config.drawAndSave(name, "hitsedge", "colz", h_hitMapEdge);
+  config.drawAndSave(name, "trackspixeledge", "colz", h_trackPixelMapEdge);
+  config.drawAndSave(name, "hitspixeledge", "colz", h_hitPixelMapEdge);
+  
+  // Find the efficiency map  
+  TH2D* h_effMapEdge = (TH2D*) h_hitMapEdge->Clone(TString::Format("effMapEdge"));
+  h_effMapEdge->SetStats(false);
+  h_effMapEdge->Divide(h_hitMapEdge, h_trackMapEdge, 1.0, 1.0, "B");
+  config.drawAndSave(name, "effMapEdge", "colz", h_effMapEdge);  
+  
+  TH2D* h_effPixelMapEdge = (TH2D*) h_hitPixelMapEdge->Clone(TString::Format("effPixelMapEdge"));
+  h_effPixelMapEdge->SetTitle("");
+  h_effPixelMapEdge->SetStats(false);
+  h_effPixelMapEdge->Divide(h_hitPixelMapEdge, h_trackPixelMapEdge, 1.0, 1.0, "B");
+  drawToFileSensorAspect(config, name, "effPixelMapEdgeAspect", "colz", h_effPixelMapEdge);
+  
+  // Get the 1D edge efficiency
+  const DUT* dut = config.getDut(this->iden);
+  double pitchX = dut->getPitchX();
+  if (pitchX == 400.0) {
+    h_trackPixelMapEdge->Rebin2D(8,2);
+    h_hitPixelMapEdge->Rebin2D(8,2);
+  }
+  else {
+    h_trackPixelMapEdge->Rebin2D(5,2);
+    h_hitPixelMapEdge->Rebin2D(5,2);
+  }
+  char projname[500];
+  sprintf(projname,"trackPixelMapEdgeX-%d",this->iden);
+  TH1D* h_trackPixelMapEdgeX = (TH1D*) h_trackPixelMapEdge->ProjectionX(projname, -1, 999999, "E");
+  sprintf(projname,"hitPixelMapEdgeX-%d",this->iden);
+  TH1D* h_hitPixelMapEdgeX = (TH1D*) h_hitPixelMapEdge->ProjectionX(projname, -1, 999999, "E");
+  //TGraphAsymmErrors* tg_effPixelMapEdgeX = new TGraphAsymmErrors();
+  //tg_effPixelMapEdgeX->BayesDivide(h_hitPixelMapEdgeX, h_trackPixelMapEdgeX);
+  TGraphAsymmErrors* tg_effPixelMapEdgeX = new TGraphAsymmErrors(h_hitPixelMapEdgeX, h_trackPixelMapEdgeX,"cl=0.683 b(1,1) mode");
+  drawToFileEdgeEff(config, name, "effPixelEdgeAspect", tg_effPixelMapEdgeX);
+  
+  // Reset the ROOT style
+  //gROOT->SetStyle();
+  
+}
+
+
+void EdgeEfficiency::drawToFileSensorAspect( const TbConfig& config, const char* analysisName, const char* histoName, const char* drawOpts, TH1* h1, TH1* h2, TH1* h3, TH1* h4) const{
+
+  char* fileName = config.buildHistName(analysisName,histoName);
+  const DUT* dut = config.getDut(this->iden);
+
+  // Get the correct aspect ratio of the pixel
+  double k = dut->getPitchY() / dut->getPitchX();  
+  TCanvas* canvas = new TCanvas("", "", 1200, (int) floor(1200*k));
+  canvas->cd();
+
+  h1->Draw(drawOpts);
+  if(h2 != NULL ){
+    h2->Draw("same");
+  }
+  if(h3 != NULL ){
+    h3->Draw("same");
+  }
+  if(h4 != NULL ){
+    h4->Draw("same");
+  }
+  canvas->SaveAs(fileName);
+  delete canvas;
+  delete [] fileName;
+
+}
+
+
+void EdgeEfficiency::drawToFileEdgeEff( const TbConfig& config, const char* analysisName, const char* histoName, TObject* histo) const{
+
+  const DUT* dut = config.getDut(this->iden);
+  char* fileName = config.buildHistName(analysisName,histoName);
+  double pitchX = dut->getPitchX();
+
+  // Make sure both a graph and hist can be used in the fit
+  TGraphAsymmErrors* gr_histo = 0;
+  TH1D* h_histo = 0;
+  bool isGraph = false;
+  if( histo->InheritsFrom("TGraph") ) {
+    isGraph = true;
+    gr_histo = (TGraphAsymmErrors*) histo;
+  } else if( histo->InheritsFrom("TH1D") ) {
+    h_histo = (TH1D*) histo;
+  } else {
+    TBALOG(kERROR) << "You must have either a TH1D or TGraph for the edge fit!" << endl;
+    exit(1);
+  }
+  assert(tbutils::XOR(gr_histo, h_histo));
+
+  TCanvas* canvas = new TCanvas("", "", 1200, 300);
+  canvas->cd();
+  gStyle->SetPadBottomMargin(0.15);
+  gROOT->ForceStyle();
+  TString title = ";Long pixel [#mum ];Active edge efficiency";
+  TH1* h_plot = 0;
+  if( isGraph ) {
+    //gr_histo->SetLineWidth((Width_t)1.3); // BJD: Really?!
+    gr_histo->SetLineWidth(1.3);
+    gr_histo->SetMarkerStyle(20);
+    gr_histo->SetMarkerSize(0.7);
+    gr_histo->Draw("AP");
+    gr_histo->SetTitle(title);
+    gr_histo->GetXaxis()->SetLabelSize(0.07);
+    gr_histo->GetYaxis()->SetLabelSize(0.07);
+    gr_histo->GetYaxis()->SetTitleSize(0.08);
+    gr_histo->GetXaxis()->SetTitleSize(0.08);
+    gr_histo->GetYaxis()->SetTitleOffset(0.4);
+    gr_histo->GetXaxis()->SetTitleOffset(0.9);
+    gr_histo->GetXaxis()->SetRangeUser(0.,2*pitchX);
+    h_plot = gr_histo->GetHistogram();
+    //h_plot->SetFillColor(kOrange);
+    //h_plot->Draw("same");
+  } else {
+    //h_histo->SetLineWidth((Width_t)1.3); // BJD: Really?!
+    h_histo->SetLineWidth(1.3);
+    h_histo->SetTitle(title);
+    h_histo->GetYaxis()->SetTitleSize(0.09);
+    h_histo->GetYaxis()->SetTitleOffset(0.04);
+    h_histo->Draw();
+    h_plot = h_histo;
+  }
+
+  // Draw an area covering the next to last pixel for visualization
+  double xfirstpix;
+  if (pitchX == 400.) 
+    xfirstpix = 600.; //FEI3
+  else
+    xfirstpix = 250.; //FEI4
+  int outerEdgeBin = h_plot->FindBin(xfirstpix);
+  TH1D* h_innerPixel = (TH1D*) h_plot->Clone("innerPixel");
+  for( int iBin = 1; iBin != h_innerPixel->GetNbinsX()+1; ++iBin) {
+    if( iBin < outerEdgeBin ) h_innerPixel->SetBinContent(iBin, 0.0);
+    else h_innerPixel->SetBinContent(iBin, h_innerPixel->GetMaximum());
+  }
+  h_innerPixel->SetFillColor(kBlue);
+  //h_innerPixel->SetLineColor(kGray);
+  h_innerPixel->SetFillStyle(3004);
+  h_innerPixel->SetLineWidth(0.5);
+  h_innerPixel->Draw("same");
+  if (pitchX == 400.) {
+    tbutils::myMultiLineText(0.65, 0.26, "Inner|pixel", kWhite, kBlue+2);
+    tbutils::myMultiLineText(0.55, 0.26, "Edge|pixel", kWhite, kBlack);
+  }
+  else {
+    tbutils::myMultiLineText(0.65, 0.26, "Inner|pixel", kWhite, kBlue+2);
+    tbutils::myMultiLineText(0.55, 0.26, "Edge|pixel", kWhite, kBlack);
+  }
+
+  // Redraw the plot to get it above?
+  /*
+  if(isGraph) {
+    gr_histo->Draw("ALP,same");
+  } else {
+    h_histo->Draw("same");
+  }
+  */
+
+  TF1* fit = tbutils::GetGausLineFit(histo, "turnon_fullrange", 10, xfirstpix, 50.0, 9.0, 0.98);
+  fit->SetLineColor(kRed);
+  //fit->SetLineWidth((Width_t)2.3); // BJD: Really?!
+  fit->SetLineWidth(2.3);
+  fit->Draw("L same");
+  double xf90 = fit->GetX(0.9);
+  double xf10 = fit->GetX(0.1);
+  TPad *pad2 = new TPad("", "", 0.28, 0.27, 0.5, 0.51);
+  pad2->Draw();
+  pad2->cd();
+
+  TPaveStats *paramBox = new TPaveStats(0.0, 0.0, 1.0, 1.0);
+  paramBox->AddText("Active edge fit");
+  char * line = new char[300];
+  sprintf(line,"Pixel width=%.1f#pm%.1f #mum",xfirstpix-fit->GetParameter(0),fit->GetParError(0));
+  paramBox->AddText(line);
+  sprintf(line,"Resolution=%.1f#pm%.1f #mum",fit->GetParameter(1),fit->GetParError(1));
+  paramBox->AddText(line);
+  sprintf(line,"Plateau eff.=%.3f#pm%.3f",fit->GetParameter(2),fit->GetParError(2));
+  paramBox->AddText(line);
+  sprintf(line,"90\% (10\%)= %.1f (%.1f) #mum",xfirstpix-xf90,xfirstpix-xf10);
+  paramBox->AddText(line);
+  paramBox->SetFillColor(0);
+  paramBox->SetTextColor(kBlack);
+  paramBox->Draw();
+  canvas->SaveAs(fileName);  
+
+  TString rootfilename(fileName);
+  rootfilename.ReplaceAll(".","_");  
+  rootfilename.ReplaceAll("-","_");  
+  rootfilename.ReplaceAll("/","_");  
+  canvas->SetName(rootfilename.Data());
+  rootfilename = fileName;
+  rootfilename.ReplaceAll(".","_");  
+  rootfilename += ".C";
+  canvas->SaveAs(rootfilename.Data());
+
+  delete canvas;
+  delete fileName;
+  delete fit;
+  delete paramBox;
+
+  //delete pad2;
+
+  return;
+
+}
+
+  
+void EdgeEfficiency::drawToFilePixelMapEff( const TbConfig& config, 
+					    const char* analysisName, const char* histoName,
+					    TH2D* hitPixelMap, TH2D* trackPixelMap) const{
+
+  const DUT* dut = config.getDut(this->iden);
+  char* fileName = config.buildHistName(analysisName,histoName);
+  double pitchX = dut->getPitchX();
+
+  trackPixelMap->Rebin2D(8,2);
+  hitPixelMap->Rebin2D(8,2);    
+  //Find the pixel efficiency map  
+  TH2D* effPixelMap = (TH2D*) hitPixelMap->Clone(TString::Format("effPixelMap"));
+  effPixelMap->SetTitle("");
+  effPixelMap->SetStats(false);
+  effPixelMap->Divide(hitPixelMap,trackPixelMap,1.,1.,"B");
+  
+  TH2D* effPixelMapAspect = (TH2D*)effPixelMap->Clone(TString::Format("effPixelMapAspect"));
+  
+  
+  // In order make the palette readable I make two plots with different aspect ratios
+  // one which I use only to get the palette
+  // use a fixed palette in order to compare with other sensors
+  
+  //Remove the ticks on the axis
+  //effPixelMapAspect->GetXaxis()->SetTickLength(0.00000000001);
+  effPixelMapAspect->GetYaxis()->SetTickLength(0.01);
+  //Reduce the axis label entries
+  effPixelMapAspect->GetXaxis()->SetNdivisions(4);
+  effPixelMapAspect->GetYaxis()->SetNdivisions(2);
+  effPixelMapAspect->GetXaxis()->SetLabelOffset(0.045);
+  effPixelMapAspect->GetYaxis()->SetLabelOffset(0.012);
+  effPixelMapAspect->GetXaxis()->SetLabelSize(0.12);
+  effPixelMapAspect->GetYaxis()->SetLabelSize(0.12);
+  //Remove the titles
+  effPixelMapAspect->SetTitle(";;");
+  
+  //This is canvas with correct aspect ratio
+  double k = dut->getPitchY() / dut->getPitchX();  
+  TCanvas* canvas = new TCanvas("","",1600,(int) floor(1600*k));
+  canvas->cd();
+  gStyle->SetPalette(1,0);
+  effPixelMapAspect->Draw("colz");
+  gPad->Update();
+  TPaletteAxis *palette = (TPaletteAxis*)effPixelMapAspect->GetListOfFunctions()->FindObject("palette");
+  //Remove the Palette
+  if(palette!=0) {
+    palette->SetY1NDC(1.0);
+    palette->SetY2NDC(0.9999999);
+    palette->SetX1NDC(1.0);
+    palette->SetX2NDC(0.9999999);
+  } else {
+    TBALOG( kERROR ) << "palette not found!" << endl; 
+    //exit(-1);    
+  }
+  canvas->SaveAs(fileName);  
+  config.saveToFile(name,histoName,effPixelMapAspect);
+  
+  delete canvas;
+  delete fileName;
+  delete effPixelMapAspect;
+
+  //This is canvas with wrong aspect ratio used to get the large palette
+  TCanvas* canvas2 = new TCanvas("","",1600,1600);
+  canvas2->cd();
+  gStyle->SetPalette(1,0);
+  effPixelMap->Draw("colz");
+  gPad->Update();
+  palette = (TPaletteAxis*)effPixelMap->GetListOfFunctions()->FindObject("palette");
+  if(palette!=0) {
+    palette->SetY2NDC(0.99);
+    palette->SetY1NDC(0.03);
+    palette->SetX2NDC(0.7);    
+  } else {
+    TBALOG( kERROR ) << "palette not found!" << endl; 
+    //exit(-1);    
+  }
+  char* histoName2 = new char[600];
+  sprintf(histoName2, "%s-large", histoName);  
+  char* fileName2 = config.buildHistName(analysisName,histoName2);
+  canvas2->SaveAs(fileName2);
+  delete fileName2;
+  //delete canvas2;
+  
+  if(palette!=0) {
+    TCanvas* canvas3 = new TCanvas("","",1600,1600);
+    canvas3->cd();
+    palette->Draw();
+    
+    char* histoName3 = new char[600];
+    sprintf(histoName3, "%s-largepalette", histoName);  
+    char* fileName3 = config.buildHistName(analysisName,histoName3);
+    canvas3->SaveAs(fileName3);
+    delete canvas3;
+  }
+  //delete canvas2;
+  delete effPixelMap;
+  
+}

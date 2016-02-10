@@ -1,0 +1,263 @@
+#include "dut.h"
+
+using namespace std;
+
+// private
+
+void DUT::addMask(int col, int row) {
+	pair<int, int> mask = make_pair(col, row);
+	masks.push_back(mask);
+}
+
+void DUT::addMaskedPixels(const char* fileName, int type) {
+	//the file should contain a list of pixels with 'column:row' with line breaks
+	std::string line;
+	std::ifstream fs(fileName);
+	if (!fs.is_open()) {
+		std::cerr << "The mask '" << fileName << "' could not be opened."
+				<< std::endl;
+		exit(-1);
+	}
+	while (!fs.eof()) {
+		getline(fs, line);
+		std::string::size_type found = line.find(":");
+		if (found == string::npos) {
+			continue;
+		}
+		istringstream issr(line.substr(found + 1));
+		int row;
+		issr >> row;
+		istringstream issc(line.erase(found, std::string::npos));
+		int column;
+		issc >> column;
+
+//    if (76 <= column && column <= 78 && 292 <= row && row <=294)
+//    cout << column << ":" << row << " type = " << type << endl;
+
+		addMaskedPixel(column, row, type);
+	}
+	fs.close();
+	return;
+}
+
+void DUT::resetAngles() {
+	anglePhiFromGEAR = 0;
+	angleEtaFromGEAR = 0;
+	anglePhiFromAlignment = 0;
+	angleEtaFromAlignment = 0;
+	anglePhiCalculated = 0;
+	angleEtaCalculated = 0;
+	anglesCalculated = false;
+	hasAnglesFromReco = false;
+}
+
+// constructors
+
+DUT::DUT(const char* module_name, int iden, int numElec, double pitchX,
+		double pitchY, double epitchX, double epitchY, int ncols, int nrows,
+		int maxCol, int maxRow, int skipCols, int skipRows, double matchX,
+		double matchY, double refLimitX, double refLimitY,
+		double thickness, double signal0) :
+		name(module_name), iden(iden), numElec(numElec), pitchX(pitchX), pitchY(
+				pitchY), epitchX(epitchX), epitchY(epitchY), ncols(ncols), nrows(
+				nrows), maxCol(maxCol), maxRow(maxRow), skipCols(skipCols), skipRows(
+				skipRows), matchX(matchX), matchY(matchY), refLimitX(
+				refLimitX), refLimitY(refLimitY), thickness(thickness), signal0(
+				signal0) {
+	resetAngles();
+	for (int i = 0; i < 82; i++) {
+		for (int j = 0; j < 338; j++) {
+			maskedpixels[i][j] = 0;
+		}
+	}
+	// create dummy calibration object which can be asked whether it actually exists
+	setToTcalib(new ToTCalib_FEI3_TurboDAQ());
+}
+
+DUT::DUT(const char* name, int iden, int numElec) {
+	this->name = (char*) name;
+	this->iden = iden;
+	this->numElec = numElec;
+	bias = 0.0;
+	lv1Min = -1;
+	lv1Max = -1;
+	resetAngles();
+
+	setToTcalib(new ToTCalib_FEI3_TurboDAQ());
+}
+
+DUT::DUT() {
+	name = (char*) "";
+	iden = -1;
+	numElec = 0;
+	bias = 0.0;
+	lv1Min = -1;
+	lv1Max = -1;
+	resetAngles();
+
+	setToTcalib(new ToTCalib_FEI3_TurboDAQ());
+}
+
+/****************************sensor/FE properties setters and getters***********************/
+
+double DUT::getSignal0() {
+	if (signal0 > 0) {
+		return signal0;
+	} else {
+		return 0;
+	}
+}
+
+/****************************additional properties setters and getters***************************/
+
+void DUT::lv1Range(int min, int max) {
+	lv1Min = min;
+	lv1Max = max;
+}
+
+void DUT::addMasks(const char* fileName) {
+	//the file should contain a list of pixels with 'row:column' with line breaks
+	std::string line;
+	std::ifstream fs(fileName);
+	if (!fs.is_open()) {
+		std::cerr << "The mask '" << fileName << "' could not be opened."
+				<< std::endl;
+		exit(-1);
+	}
+	while (!fs.eof()) {
+		getline(fs, line);
+		std::string::size_type found = line.find(":");
+		if (found == string::npos) {
+			continue;
+		}
+		
+		// corrected column and row by exchanging them in the input order
+		// also made this consistent in PixelMasker::buildEvent()
+		// also in CheckRegion::buildEvent() this has to be corrected
+		//
+		// apparently in maskandlvl1.cc the event.dut->masks are used as well
+		// so there needs to be a correction in that file if it is to be used
+		istringstream issr(line.substr(found + 1));
+		int row;
+		issr >> row;
+		istringstream issc(line.erase(found, std::string::npos));
+		int column;
+		issc >> column;
+		/*
+		istringstream issc(line.substr(found + 1));
+		int column;
+		issc >> column;
+		istringstream issr(line.erase(found, std::string::npos));
+		int row;
+		issr >> row;
+		*/
+
+		addMask(column, row);
+	}
+	fs.close();
+	return;
+}
+
+void DUT::addMaskedPixel(int col, int row, int type) {
+	if (type == 1) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+
+				maskedpixels[col + i][row + j] = maskedpixels[col + i][row + j]
+						+ 1;
+
+			}
+		}
+	}
+	if (type == 10)
+		maskedpixels[col + 1][row + 1] = maskedpixels[col + 1][row + 1] + 10;
+
+	/*
+	 if (75<=col && col<=79 && 291<=row && row<=295){
+	 cout << col << " " << row << " type = " << type << endl;
+	 col = 77; row = 293;
+	 cout << maskedpixels[col+0][row+0] << " " << maskedpixels[col+1][row+0] << " " << maskedpixels[col+2][row+0] << endl;
+	 cout << maskedpixels[col+0][row+1] << " " << maskedpixels[col+1][row+1] << " " << maskedpixels[col+2][row+1] << endl;
+	 cout << maskedpixels[col+0][row+2] << " " << maskedpixels[col+1][row+2] << " " << maskedpixels[col+2][row+2] << endl;
+	 cout <<  "--------" << endl;
+	 }
+	 */
+}
+
+void DUT::addToTCalib(const std::string& filename, std::string type) {
+
+	if(type == "determine") {
+		// trying to identify the file
+		std::cout << "Trying to identify calibration file type" << std::endl;
+
+		delete totcalib;
+		totcalib = new ToTCalib_FEI3_USBpix_converted();
+		if(totcalib->addToTCalib(filename, iden)==true){
+			std::cout << "Successfully read clibration file for DUT " << getDUTid() << " using type fei3_usbpix_converted." << std::endl;
+			return;
+		} else {
+			std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but failed trying using type fei3_usbpix_converted." << std::endl;
+		};
+
+		delete totcalib;
+		totcalib = new ToTCalib_FEI3_TurboDAQ();
+		if(totcalib->addToTCalib(filename, iden)==true){
+			std::cout << "Successfully read calibration file for DUT " << getDUTid() << " using type fei3_turbodaq_textfile." << std::endl;
+			return;
+		} else {
+			std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but failed trying using type fei3_turbodaq_textfile." << std::endl;
+		};
+
+		delete totcalib;
+		totcalib = new ToTCalib_FEI3_TurboDaq_converted_from_ToT_file();
+		if(totcalib->addToTCalib(filename, iden)==false){
+			std::cout << "Successfully read calibration file for DUT " << getDUTid() << " using type fei3_turbodaq_converted_from_tot_file." << std::endl;
+			return;
+		} else {
+			std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but failed trying using type fei3_turbodaq_converted_from_tot_file." << std::endl;
+		};
+
+		std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but no method worked - aborting attempt." << std::endl;
+		return;
+	} else {
+		if (type == "fei3_usbpix_converted") {
+			delete totcalib;
+			totcalib = new ToTCalib_FEI3_USBpix_converted();
+			if(totcalib->addToTCalib(filename, iden)==false){
+				std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but failed trying requested type fei3_usbpix_converted." << std::endl;
+			}
+		} else if (type == "fei3_turbodaq_textfile") {
+			delete totcalib;
+			totcalib = new ToTCalib_FEI3_TurboDAQ();
+			if(totcalib->addToTCalib(filename, iden)==false){
+				std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but failed trying requested type fei3_turbodaq_textfile." << std::endl;
+			}
+		} else if (type == "fei3_turbodaq_converted_from_tot_file") {
+			delete totcalib;
+			totcalib = new ToTCalib_FEI3_TurboDaq_converted_from_ToT_file();
+			if(totcalib->addToTCalib(filename, iden)==false){
+				std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but failed trying requested type fei3_turbodaq_converted_from_tot_file." << std::endl;
+			}
+		} else {
+			std::cout << "Tried reading in calibration file for DUT " << getDUTid() << " but readin method " << type << " is unknown." << std::endl;
+		};
+	}
+
+	/*
+	delete totcalib;
+	if (filename.find(".out") != string::npos) {
+		totcalib = new ToTCalib_FEI3_TurboDAQ();
+	}
+	if (filename.find(".root") != string::npos) {
+		totcalib = new ToTCalib_FEI3_TurboDaq_converted_from_ToT_file();
+	}
+	totcalib->addToTCalib(filename, iden);
+	*/
+}
+
+/****************************additional methods*************************************************/
+
+void DUT::initRun(int currentRun) {
+	ecorrs.initRun(currentRun);
+	resetAngles();
+}

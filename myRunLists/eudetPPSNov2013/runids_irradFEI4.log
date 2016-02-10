@@ -1,0 +1,97 @@
+starting script
+process geoid153
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSNov2013/geoid153
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSNov2013/geoid153 -f -c eudetPPSNov2013FEI34
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+process geoid154
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSNov2013/geoid154
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSNov2013/geoid154 -f -c eudetPPSNov2013FEI34
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+process geoid156
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSNov2013/geoid156
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSNov2013/geoid156 -f -c eudetPPSNov2013FEI34
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+process geoid159
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSNov2013/geoid159
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSNov2013/geoid159 -f -c eudetPPSNov2013FEI34
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon

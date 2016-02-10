@@ -1,0 +1,31 @@
+#include "event.h"
+#include "tbanalysis.h"
+#include <TH2D.h>
+
+class EdgeEfficiency : public TbAnalysis{
+
+ private:
+  int nTracks;
+  int nTracksEdge;
+  int nHitsEdge;
+
+  TH2D* h_trackMapEdge;
+  TH2D* h_hitMapEdge;
+  TH2D* h_anyHitMapEdge;
+  TH2D* h_trackPixelMapEdge;
+  TH2D* h_hitPixelMapEdge;
+  
+  void drawToFileSensorAspect( const TbConfig& config, const char* analysisName, const char* histoName, const char* drawOpts,
+			       TH1* h1, TH1* h2=NULL, TH1* h3=NULL, TH1* h4=NULL) const;
+  void drawToFileEdgeEff( const TbConfig& config, const char* analysisName, const char* histoName,
+			  TObject* hist) const;
+  void drawToFilePixelMapEff( const TbConfig& config, const char* analysisName, const char* histoName,
+			      TH2D* hitPixelMap, TH2D* trackPixelMap) const;
+  
+ public:
+  virtual void init(TbConfig &config);
+  virtual void event(const TbConfig &config, const Event &event);
+  virtual void finalize(const TbConfig &config);
+
+};
+

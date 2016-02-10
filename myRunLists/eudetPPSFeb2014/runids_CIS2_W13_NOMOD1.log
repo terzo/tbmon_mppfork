@@ -1,0 +1,249 @@
+starting script
+###################################################################
+process geoid211
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid211
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid211 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid212
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid212
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid212 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid213
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid213
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid213 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid214
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid214
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid214 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid215
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid215
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid215 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid216
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid216
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid216 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid217
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid217
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid217 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+
+###################################################################
+process geoid218
+###################################################################
+
+OPTION = -l
+RUNS = myRunLists/eudetPPSFeb2014/geoid218
+CONFIG = eudetPPSFeb2014FEI4
+tbmon will be called with:
+./tbmon -l myRunLists/eudetPPSFeb2014/geoid218 -f -c eudetPPSFeb2014FEI4
+output will be logged in bdrive/tbmonlogs.log
+
+>copying driver_1_hotpixfinder.cc
+>execute make
+>execute tbmon
+
+>copying driver_2_checkalign1.cc
+>execute make
+>execute tbmon
+
+>copying driver_3_getetacorr.cc
+>execute make
+>execute tbmon
+
+>copying driver_4_checkalign2.cc
+>execute make
+>execute tbmon
+
+>copying driver_original.cc
+>execute make
+>execute tbmon
+

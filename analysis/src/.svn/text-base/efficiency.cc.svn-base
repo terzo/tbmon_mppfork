@@ -1,0 +1,610 @@
+#include "efficiency.h"
+
+void Efficiency::init(TbConfig & config) {
+
+	const DUT* dut = config.getDut(this->iden);
+	double pitchX = dut->getPitchX();
+	double pitchY = dut->getPitchY();
+	int nCols = dut->getNcols();
+	int nRows = dut->getNrows();
+
+	ntracks = 0;
+	nhits = 0;
+	anyhit = 0;
+
+	h_trackMap = new TH2D("", "Track Map;Column;Row", nCols, 0, nCols, nRows, 0,
+			nRows);
+	h_hitMap = new TH2D("", "Hit Map;Column;Row", nCols, 0, nCols, nRows, 0,
+			nRows);
+	h_anyHitMap = new TH2D("", "Any Hit Map;Column;Row", nCols, 0, nCols, nRows,
+			0, nRows);
+
+	h_trackMap216 = new TH2D("", "Track Map 216;Column;Row", (nCols - 2) / 2, 1,
+			nCols - 1, (nRows / 16), 0, nRows);
+	h_hitMap216 = new TH2D("", "Hit Map 216;Column;Row", (nCols - 2) / 2, 1,
+			nCols - 1, (nRows / 16), 0, nRows);
+	h_anyHitMap216 = new TH2D("", "Any Hit Map 216;Column;Row", (nCols - 2) / 2,
+			1, nCols - 1, (nRows / 16), 0, nRows);
+
+	h_trackPixelMap = new TH2D("",
+			"Track Pixel Map;Long Side [#mum];Short Side[#mum]",
+			TMath::Nint(pitchX) * 2, 0, pitchX * 2.0, TMath::Nint(pitchY) * 2,
+			0, pitchY * 2.0);
+	h_hitPixelMap = new TH2D("",
+			"Hit Pixel Map;Long Side [#mum];Short Side[#mum]",
+			TMath::Nint(pitchX) * 2, 0, pitchX * 2.0, TMath::Nint(pitchY) * 2,
+			0, pitchY * 2.0);
+	h_trackPixelBiasMap = new TH2D("",
+			"Track Pixel Bias Map;Long Side [#mum];Short Side[#mum]",
+			TMath::Nint(pitchX) * 2, 0, pitchX * 2.0, 10, 20, 30);
+	h_hitPixelBiasMap = new TH2D("",
+			"Hit Pixel Bias Map;Long Side [#mum];Short Side[#mum]",
+			TMath::Nint(pitchX) * 2, 0, pitchX * 2.0, 10, 20, 30);
+	h_trackPixelReadoutMap = new TH2D("",
+			"Track Pixel Readout Map;Long Side [#mum];Short Side [#mum]",
+			TMath::Nint(pitchX) * 2, 0, pitchX * 2.0, 10, 45, 55);
+	h_hitPixelReadoutMap = new TH2D("",
+			"Hit Pixel Readout Map;Long Side [#mum];Short Side[#mum]",
+			TMath::Nint(pitchX) * 2, 0, pitchX * 2.0, 10, 45, 55);
+
+	//Get -P:key val cmd line arguments
+	char key[100];
+	sprintf(key, "efficiency_effPlotMinY_%u", this->iden);
+	effPlotMinY = config.cmdLineExtras_argGetter(key, 0.8,
+			"Minimum plotted value in efficiency projection plots");
+
+	sprintf(key, "efficiency_pixMapBinSizeX_%u", this->iden);
+	pixMapBinSizeX = (int) floor(
+			config.cmdLineExtras_argGetter(key, 8.0,
+					"Pixel map bin size, x-direction (int>=1) [um]"));
+
+	sprintf(key, "efficiency_pixMapBinSizeY_%u", this->iden);
+	pixMapBinSizeY = (int) floor(
+			config.cmdLineExtras_argGetter(key, 2.0,
+					"Pixel map bin size, y-direction (int>=1) [um]"));
+
+	if (pixMapBinSizeX <= 0 or pixMapBinSizeY <= 0) {
+		cout << "[ efficiency ]; In Init(): Got an invalid binsize" << endl;
+		exit(-1);
+	}
+
+}
+
+void Efficiency::event(const TbConfig &config, const Event &event) {
+
+	TBALOG(kDEBUG3) << "Started analysis class event() command" << endl;
+	// Check that track has passed all cuts
+	if (event.fTrack != event::kGood) {
+		TBALOG (kDEBUG3) << "Event not passed all cuts" << endl;
+		return;
+	}
+	// Check that clusters have been made successfully
+	if (event.fClusters != event::kGood) {
+		TBALOG (kDEBUG3) << "Clusters not present in event" << endl;
+		return;
+	}
+	// Are we in the central region on the chip?
+	if (event.fTrackCentralRegion != event::kGood) {
+		return;
+	}
+	// Are we in a good region of the chip?
+	if (event.fTrackRegion != event::kGood) {
+		return;
+	}
+
+	ntracks++;
+
+	TBALOG(kDEBUG2) << "Event: " << config.currentEntry << " Run: "
+			<< config.currentRun << endl;
+	TBALOG(kDEBUG2) << "Accepted track" << endl;
+
+	// Plot the position of *any* single hits
+	for (vector<PllHit*>::const_iterator i = event.hits.begin();
+			i != event.hits.end(); ++i) {
+		if ((*i)->iden != this->iden)
+			continue;
+		h_anyHitMap->Fill((*i)->col, (*i)->row);
+		h_anyHitMap216->Fill((*i)->col, (*i)->row);
+	}
+
+	// Fill the sensor and pixel map
+	// Note the special case for the edge, since it reaches outside the sensor area
+	h_trackMap->Fill(tbutils::getCol(event.trackX, event),
+			tbutils::getRow(event.trackY, event));
+	h_trackMap216->Fill(tbutils::getCol(event.trackX, event),
+			tbutils::getRow(event.trackY, event));
+	h_trackPixelMap->Fill(tbutils::getTrackTwoPixelEdgeDistance(event, "x"),
+			tbutils::getTrackTwoPixelEdgeDistance(event, "y"));
+	double y = tbutils::getTrackTwoPixelEdgeDistance(event, "y");
+	if (biasElecRow(y, event)) {
+		// There are two rows that should be overlayed!
+		TBALOG(kDEBUG3) << "This track " << y
+				<< " is in the bias electrode row!";
+		if (y > event.dut->getPitchY())
+			y = y - event.dut->getPitchY();
+		TBALOG(kDEBUG3) << " -> filling with " << y << endl;
+		h_trackPixelBiasMap->Fill(
+				tbutils::getTrackTwoPixelEdgeDistance(event, "x"), y);
+	}
+	y = tbutils::getTrackTwoPixelEdgeDistance(event, "y"); // refresh this value? may not matter (BJD)
+	if (readoutElecRow(y, event)) {
+		TBALOG(kDEBUG3) << "This track " << y
+				<< " is in the read-out electrode row!" << endl;
+		h_trackPixelReadoutMap->Fill(
+				tbutils::getTrackTwoPixelEdgeDistance(event, "x"), y);
+	}
+
+	// Are there any hits in the DUT
+	if (event.hits.size() > 0) {
+		anyhit++;
+		TBALOG(kDEBUG2) << "Found hit in DUT!" << endl;
+	}
+
+	// Look for matched clusters
+	if (cluster::getMatched(event.clusters, event) != -1) {
+		TBALOG(kDEBUG2) << "Found matching cluster!" << endl;
+	}
+	if (cluster::getMatched(event.clusters, event) == -1) {
+		return;
+	}
+
+	nhits++;
+	h_hitMap->Fill(tbutils::getCol(event.trackX, event),
+			tbutils::getRow(event.trackY, event));
+	h_hitMap216->Fill(tbutils::getCol(event.trackX, event),
+			tbutils::getRow(event.trackY, event));
+	h_hitPixelMap->Fill(tbutils::getTrackTwoPixelEdgeDistance(event, "x"),
+			tbutils::getTrackTwoPixelEdgeDistance(event, "y"));
+	y = tbutils::getTrackTwoPixelEdgeDistance(event, "y"); // refresh this value? may not matter (BJD)
+	if (biasElecRow(y, event)) {
+		// There are two rows that should be overlayed!
+		TBALOG(kDEBUG3) << "This track " << y
+				<< " is in the bias electrode row!";
+		if (y > event.dut->getPitchY())
+			y = y - event.dut->getPitchY();
+		TBALOG(kDEBUG3) << " -> filling with " << y << endl;
+		h_hitPixelBiasMap->Fill(
+				tbutils::getTrackTwoPixelEdgeDistance(event, "x"), y);
+	}
+	y = tbutils::getTrackTwoPixelEdgeDistance(event, "y"); // refresh this value? may not matter (BJD)
+	if (readoutElecRow(y, event)) {
+		h_hitPixelReadoutMap->Fill(
+				tbutils::getTrackTwoPixelEdgeDistance(event, "x"), y);
+	}
+
+}
+
+void Efficiency::finalize(const TbConfig &config) {
+
+	const DUT* dut = config.getDut(this->iden);
+	int nCols = dut->getNcols();
+	int nRows = dut->getNrows();
+
+	config.drawAndSave(name, "trkMap", "colz", h_trackMap);
+	config.drawAndSave(name, "anyHitMap", "colz", h_anyHitMap);
+	config.drawAndSave(name, "hitMap", "colz", h_hitMap);
+	config.drawAndSave(name, "trkPixMap", "colz", h_trackPixelMap);
+	config.drawAndSave(name, "hitPixMap", "colz", h_hitPixelMap);
+	config.drawAndSave(name, "trkMap216", "colz", h_trackMap216);
+	config.drawAndSave(name, "anyHitMap216", "colz", h_anyHitMap216);
+	config.drawAndSave(name, "hitMap216", "colz", h_hitMap216);
+
+	TBALOG(kINFO) << "Tracks:             " << ntracks << endl;
+	TBALOG(kINFO) << "Hits:               " << anyhit << endl;
+	TBALOG(kINFO) << "Tracks w/ hit:      " << nhits << endl;
+	double eff = double(nhits) / double(ntracks);
+	double eeff = TMath::Sqrt(eff * (1 - eff) / ntracks);
+	TBALOG(kINFO) << "Efficiency (match): " << eff << " +- " << eeff << endl;
+	eff = double(anyhit) / double(ntracks);
+	eeff = TMath::Sqrt(eff * (1 - eff) / ntracks);
+	TBALOG(kINFO) << "Efficiency (any):   " << eff << " +- " << eeff << endl;
+
+	// Get efficiency map(s) 
+	TH2D* h_effMap = (TH2D*) h_hitMap->Clone(TString::Format("effMap"));
+	h_effMap->SetMinimum(0.8);
+	h_effMap->SetTitle("Efficiency Map;Column;Row");
+	h_effMap->SetStats(false);
+	h_effMap->Divide(h_hitMap, h_trackMap, 1.0, 1.0, "B");
+	config.drawAndSave(name, "effMap", "colz", h_effMap);
+
+	TH2D* h_effMap216 = (TH2D*) h_hitMap216->Clone(
+			TString::Format("effMap216"));
+	h_effMap216->SetMinimum(0.8);
+	h_effMap216->SetTitle("Efficiency Map 216;Column;Row");
+	h_effMap216->SetStats(false);
+	h_effMap216->Divide(h_hitMap216, h_trackMap216, 1.0, 1.0, "B");
+	config.drawAndSave(name, "effMap216", "colz", h_effMap216);
+
+	drawToFilePixelMapEff(config, name, "effPixelMap", h_hitPixelMap,
+			h_trackPixelMap);
+	drawToFilePixelMapEff(config, name, "effPixelBiasMap", h_hitPixelBiasMap,
+			h_trackPixelBiasMap);
+	drawToFilePixelMapEff(config, name, "effPixelReadoutMap",
+			h_hitPixelReadoutMap, h_trackPixelReadoutMap);
+
+	drawToFileElecEffComp(config, name, "effPixelElecComp",
+			h_hitPixelReadoutMap, h_trackPixelReadoutMap, h_hitPixelBiasMap,
+			h_trackPixelBiasMap);
+
+	// get inefficiency map
+	TH2D* h_misshitMap = (TH2D*) h_trackMap->Clone(
+			TString::Format("misshitMap"));
+	h_misshitMap->Add(h_trackMap, h_hitMap, 1.0, -1.0);
+	TH2D* h_ineffMap = (TH2D*) h_misshitMap->Clone(TString::Format("ineffMap"));
+	h_ineffMap->SetMinimum(0.0);
+	h_ineffMap->SetMaximum(0.5);
+	h_ineffMap->Divide(h_misshitMap, h_trackMap, 1.0, 1.0, "B");
+	h_ineffMap->SetTitle("Inefficiency Map;Column;Row");
+	h_ineffMap->SetStats(false);
+	config.drawAndSave(name, "ineffMap", "colz", h_ineffMap);
+
+	TH2D* h_misshitMap216 = (TH2D*) h_trackMap216->Clone(
+			TString::Format("misshitMap216"));
+	h_misshitMap216->Add(h_trackMap216, h_hitMap216, 1.0, -1.0);
+	TH2D* h_ineffMap216 = (TH2D*) h_misshitMap216->Clone(
+			TString::Format("ineffMap216"));
+	h_ineffMap216->SetMinimum(0.0);
+	h_ineffMap216->SetMaximum(0.5);
+	h_ineffMap216->Divide(h_misshitMap216, h_trackMap216, 1.0, 1.0, "B");
+	h_ineffMap216->SetTitle("Inefficiency Map 216;Column;Row");
+	h_ineffMap216->SetStats(false);
+	config.drawAndSave(name, "ineffMap216", "colz", h_ineffMap216);
+
+//  drawToFilePixelMapEff(config,name,"ineffPixelMap",h_misshitMap,h_trackPixelMap);
+
+	TH1D* h_effDis = new TH1D("", "eff distribution", 200, 0.0, 1.0);
+	h_effDis->SetStats(1);
+	TH1D* h_ineffDis = new TH1D("", "ineff distribution", 200, 0.0, 1.0);
+	h_ineffDis->SetStats(1);
+	TH1D* h_effDis1 = new TH1D("", "eff distribution 1", 200, 0.0, 1.0);
+	h_effDis1->SetStats(1);
+	TH1D* h_ineffDis1 = new TH1D("", "ineff distribution 1", 200, 0.0, 1.0);
+	h_ineffDis1->SetStats(1);
+	TH1D* h_effDis216 = new TH1D("", "eff distribution 216", 200, 0.8, 1.0);
+	h_effDis216->SetStats(1);
+	TH1D* h_ineffDis216 = new TH1D("", "ineff distribution 216", 200, 0.0, 0.2);
+	h_ineffDis216->SetStats(1);
+	TH1D* h_effDis2161 = new TH1D("", "eff distribution 2161", 200, 0.8, 1.0);
+	h_effDis2161->SetStats(1);
+//  TH1D* h_ineffDis2161 = new TH1D("", "ineff distribution 2161", 200, 0.0, 0.2); h_ineffDis2161->SetStats(1);
+	TH1D* h_ineffDis2161 = new TH1D("", "ineff distribution 2161", 300, 0.0,
+			0.3);
+	h_ineffDis2161->SetStats(1);
+	TH1D* h_effDis2165 = new TH1D("", "eff distribution 2165", 50, 0.8, 1.0);
+	h_effDis2165->SetStats(1);
+	TH1D* h_ineffDis2165 = new TH1D("", "ineff distribution 2165", 50, 0.0,
+			0.2);
+	h_ineffDis2165->SetStats(1);
+	TH1D* h_effDis21615 = new TH1D("", "eff distribution 21615", 50, 0.8, 1.0);
+	h_effDis21615->SetStats(1);
+	TH1D* h_ineffDis21615 = new TH1D("", "ineff distribution 21615", 50, 0.0,
+			0.2);
+	h_ineffDis21615->SetStats(1);
+	for (int ybin = 1; ybin <= nRows; ybin++) {
+		for (int xbin = 1; xbin <= nCols; xbin++) {
+			int bin = h_effMap->FindBin(xbin, ybin);
+			double eff = h_effMap->GetBinContent(bin);
+			h_effDis->Fill(eff);
+			if (eff < 1)
+				h_effDis1->Fill(eff);
+			double ineff = h_ineffMap->GetBinContent(bin);
+			h_ineffDis->Fill(ineff);
+			if (ineff > 0)
+				h_ineffDis1->Fill(ineff);
+		}
+	}
+	for (int ybin = 1; ybin <= nRows; ybin += 16) {
+		for (int xbin = 1; xbin <= nCols - 1; xbin += 2) {
+			int bin = h_effMap216->FindBin(xbin, ybin);
+			double eff = h_effMap216->GetBinContent(bin);
+			h_effDis216->Fill(eff);
+			h_effDis2165->Fill(eff);
+			if (eff < 1) {
+				h_effDis2161->Fill(eff);
+				h_effDis21615->Fill(eff);
+			}
+			double ineff = h_ineffMap216->GetBinContent(bin);
+			h_ineffDis216->Fill(ineff);
+			h_ineffDis2165->Fill(ineff);
+			if (ineff > 0) {
+				h_ineffDis2161->Fill(ineff);
+				h_ineffDis21615->Fill(ineff);
+			}
+//    cout<<"ineffMap216 "<<xbin<<" "<<ybin<<" "<<bin<<" "<<ineff<<endl;
+		}
+	}
+	config.drawAndSave(name, "effDis", "", h_effDis);
+	config.drawAndSave(name, "ineffDis", "", h_ineffDis);
+	config.drawAndSave(name, "effDis1", "", h_effDis1);
+	config.drawAndSave(name, "ineffDis1", "", h_ineffDis1);
+	config.drawAndSave(name, "effDis216", "", h_effDis216);
+	config.drawAndSave(name, "ineffDis216", "", h_ineffDis216);
+	config.drawAndSave(name, "effDis2161", "", h_effDis2161);
+	config.drawAndSave(name, "ineffDis2161", "", h_ineffDis2161);
+	config.drawAndSave(name, "effDis2165", "", h_effDis2165);
+	config.drawAndSave(name, "ineffDis2165", "", h_ineffDis2165);
+	config.drawAndSave(name, "effDis21615", "", h_effDis21615);
+	config.drawAndSave(name, "ineffDis21615", "", h_ineffDis21615);
+}
+
+void Efficiency::drawToFileSensorAspect(const TbConfig& config,
+		const char* analysisName, const char* histoName, const char* drawOpts,
+		TH1* h1, TH1* h2, TH1* h3, TH1* h4) const {
+
+	char* fileName = config.buildHistName(analysisName, histoName);
+	const DUT* dut = config.getDut(this->iden);
+
+	// Get the correct aspect ratio of the pixel
+	double k = dut->getPitchY() / dut->getPitchX();
+	TCanvas* canvas = new TCanvas("", "", 1200, (int) floor(1200 * k));
+	canvas->cd();
+
+	h1->Draw(drawOpts);
+	if (h2 != NULL) {
+		h2->Draw("same");
+	}
+	if (h3 != NULL) {
+		h3->Draw("same");
+	}
+	if (h4 != NULL) {
+		h4->Draw("same");
+	}
+	canvas->SaveAs(fileName);
+	delete canvas;
+	delete[] fileName;
+
+}
+
+void Efficiency::drawToFilePixelMapEff(const TbConfig& config,
+		const char* analysisName, const char* histoName, TH2D* h_hitPixelMap,
+		TH2D* h_trackPixelMap) {
+
+	char* fileName = config.buildHistName(analysisName, histoName);
+	const DUT* dut = config.getDut(this->iden);
+
+	h_trackPixelMap->Rebin2D(pixMapBinSizeX, pixMapBinSizeY);
+	h_hitPixelMap->Rebin2D(pixMapBinSizeX, pixMapBinSizeY);
+
+	// Make projections
+	TH1D* h_hitProj = (TH1D*) h_hitPixelMap->ProjectionX(
+			TString::Format("%s_prjhit", h_hitPixelMap->GetName()), 1,
+			h_hitPixelMap->GetNbinsY(), "e");
+	TH1D* h_trkProj = (TH1D*) h_trackPixelMap->ProjectionX(
+			TString::Format("%s_prjtrack", h_trackPixelMap->GetName()), 1,
+			h_trackPixelMap->GetNbinsY(), "e");
+
+	// Get the efficiency
+	TGraphAsymmErrors* tg_effProj = new TGraphAsymmErrors();
+	tg_effProj->BayesDivide(h_hitProj, h_trkProj);
+	//tg_effProj->Divide(h_hitProj, h_trkProj, "cl=0.683 b(1,1) mode"); // should work instead but does not
+	for (int i = 0; i != tg_effProj->GetN(); ++i) {
+		tg_effProj->SetPointError(i, 0.00001, 0.000001,
+				tg_effProj->GetErrorYlow(i), tg_effProj->GetErrorYhigh(i));
+		//tg_effProj->SetPointError(i,0.00001,0.000001,0.0000001,0.000001); // No errors in Y?
+	}
+	tg_effProj->GetXaxis()->SetRangeUser(h_hitPixelMap->GetXaxis()->GetXmin(),
+			h_hitPixelMap->GetXaxis()->GetXmax());
+
+	// Make canvas with correct aspect ratio
+	double k = dut->getPitchY() / dut->getPitchX();
+	TCanvas* c_proj = new TCanvas("c_proj", "", 1200, (int) floor(1200 * k));
+	c_proj->cd();
+
+	TH1D* h = (TH1D*) tg_effProj->GetHistogram();
+	SetAspectStyle(h);
+	h->GetYaxis()->SetRangeUser(effPlotMinY, 1.01);
+	h->Draw();
+	tg_effProj->Draw("LP");
+
+	char* histoNameProj = new char[600];
+	sprintf(histoNameProj, "%s-proj", histoName);
+	char* fileNameProj = config.buildHistName(analysisName, histoNameProj);
+	c_proj->SaveAs(fileNameProj);
+
+	delete fileNameProj;
+	delete histoNameProj;
+	delete c_proj;
+	delete tg_effProj;
+
+	TCanvas* c_proj2 = new TCanvas();
+	c_proj2->cd();
+	h_trkProj->SetLineColor(kRed);
+	h_trkProj->Draw("hist");
+	h_hitProj->Draw("hist same");
+
+	char* histoNameProj2 = new char[600];
+	sprintf(histoNameProj2, "%s-projOverlay", histoName);
+	char* fileNameProj2 = config.buildHistName(analysisName, histoNameProj2);
+	c_proj2->SaveAs(fileNameProj2);
+
+	delete fileNameProj2;
+	delete histoNameProj2;
+	delete c_proj2;
+	delete h_trkProj;
+	delete h_hitProj;
+
+	// Get the pixel efficiency map  
+	TH2D* effPixelMap = (TH2D*) h_hitPixelMap->Clone(
+			TString::Format("effPixelMap"));
+	effPixelMap->SetTitle("");
+	effPixelMap->SetStats(false);
+	effPixelMap->Divide(h_hitPixelMap, h_trackPixelMap, 1.0, 1.0, "B");
+	effPixelMap->GetZaxis()->SetRangeUser(effPlotMinY, 1.0);
+
+	// Draw the palette separately, since the aspect ratio will mess it up otherwise
+	TCanvas* c_temp = new TCanvas("c_temp", "", 1200, 1200);
+	c_temp->cd();
+	gStyle->SetPalette(1, 0);
+	effPixelMap->Draw("cont4z");
+	gPad->Update();
+	TPaletteAxis* palette =
+			(TPaletteAxis*) effPixelMap->GetListOfFunctions()->FindObject(
+					"palette");
+	if (palette != 0) {
+		palette->SetX1NDC(0.4);
+		palette->SetX2NDC(0.6);
+		palette->SetY1NDC(0.03);
+		palette->SetY2NDC(0.97);
+
+		TCanvas* c_palette = new TCanvas("c_palette", "", 1200, 1200);
+		c_palette->cd();
+		palette->Draw();
+		char* histoNamePalette = new char[600];
+		sprintf(histoNamePalette, "%s-palette", histoName);
+		char* fileNamePalette = config.buildHistName(analysisName,
+				histoNamePalette);
+		c_palette->SaveAs(fileNamePalette);
+
+		delete c_palette;
+		delete histoNamePalette;
+		delete fileNamePalette;
+	} else {
+		TBALOG(kERROR) << "Palette not found!" << endl;
+	}
+	delete c_temp;
+
+	TCanvas* c_effPixMap = new TCanvas("c_effPixMap", "", 1200,
+			(int) floor(1200 * k));
+	c_effPixMap->cd();
+	gStyle->SetPalette(1, 0);
+	SetAspectStyle(effPixelMap);
+	effPixelMap->Draw("cont4");
+	gPad->Update();
+	c_effPixMap->SaveAs(fileName);
+	config.saveToFile(name, histoName, effPixelMap);
+
+	delete c_effPixMap;
+	delete fileName;
+	delete effPixelMap;
+
+}
+
+void Efficiency::drawToFileElecEffComp(const TbConfig& config,
+		const char* analysisName, const char* histoName,
+		TH2D* h_hitPixelReadMap, TH2D* h_trackPixelReadMap,
+		TH2D* h_hitPixelBiasMap, TH2D* h_trackPixelBiasMap) {
+
+	const DUT* dut = config.getDut(this->iden);
+	char* fileName = config.buildHistName(analysisName, histoName);
+
+	h_trackPixelBiasMap->Rebin2D(pixMapBinSizeX, pixMapBinSizeY);
+	h_hitPixelBiasMap->Rebin2D(pixMapBinSizeX, pixMapBinSizeY);
+	h_trackPixelReadMap->Rebin2D(pixMapBinSizeX, pixMapBinSizeY);
+	h_hitPixelReadMap->Rebin2D(pixMapBinSizeX, pixMapBinSizeY);
+
+	// Make projections
+	TH1D* h_hitProjR = (TH1D*) h_hitPixelReadMap->ProjectionX(
+			TString::Format("%s_prjhit", h_hitPixelReadMap->GetName()), 1,
+			h_hitPixelReadMap->GetNbinsY(), "e");
+	TH1D* h_trkProjR = (TH1D*) h_trackPixelReadMap->ProjectionX(
+			TString::Format("%s_prjtrack", h_trackPixelReadMap->GetName()), 1,
+			h_trackPixelReadMap->GetNbinsY(), "e");
+	TH1D* h_hitProjB = (TH1D*) h_hitPixelBiasMap->ProjectionX(
+			TString::Format("%s_prjBhit", h_hitPixelBiasMap->GetName()), 1,
+			h_hitPixelBiasMap->GetNbinsY(), "e");
+	TH1D* h_trkProjB = (TH1D*) h_trackPixelBiasMap->ProjectionX(
+			TString::Format("%s_prjBtrack", h_trackPixelBiasMap->GetName()), 1,
+			h_trackPixelBiasMap->GetNbinsY(), "e");
+
+	// Get the efficiency
+	TGraphAsymmErrors* tg_effProjR = new TGraphAsymmErrors();
+	tg_effProjR->BayesDivide(h_hitProjR, h_trkProjR);
+	TGraphAsymmErrors* tg_effProjB = new TGraphAsymmErrors();
+	tg_effProjB->BayesDivide(h_hitProjB, h_trkProjB);
+
+	for (int i = 0; i != tg_effProjR->GetN(); ++i) {
+		tg_effProjR->SetPointError(i, 0., 0., tg_effProjR->GetErrorYlow(i),
+				tg_effProjR->GetErrorYhigh(i));
+		tg_effProjB->SetPointError(i, 0., 0., tg_effProjB->GetErrorYlow(i),
+				tg_effProjB->GetErrorYhigh(i));
+	}
+	tg_effProjR->GetXaxis()->SetRangeUser(
+			h_hitPixelReadMap->GetXaxis()->GetXmin(),
+			h_hitPixelReadMap->GetXaxis()->GetXmax());
+	tg_effProjB->GetXaxis()->SetRangeUser(
+			h_hitPixelBiasMap->GetXaxis()->GetXmin(),
+			h_hitPixelBiasMap->GetXaxis()->GetXmax());
+
+	// This is canvas with correct aspect ratio
+	double k = dut->getPitchY() / dut->getPitchX();
+	TCanvas* c = new TCanvas("", "", 1200, (int) floor(1200 * k));
+	c->cd();
+
+	TH1D* h = (TH1D*) tg_effProjR->GetHistogram();
+	SetAspectStyle(h);
+	h->GetYaxis()->SetRangeUser(effPlotMinY, 1.01);
+	h->Draw();
+
+	tg_effProjR->SetLineColor(kRed);
+	tg_effProjR->SetMarkerColor(kRed);
+	tg_effProjR->Draw("L,same");
+	tg_effProjB->SetLineColor(kBlue);
+	tg_effProjB->SetMarkerColor(kBlue);
+	tg_effProjB->Draw("L,same");
+	c->SaveAs(fileName);
+
+	delete fileName;
+	delete c;
+	delete tg_effProjR;
+	delete tg_effProjB;
+	delete h_hitProjR;
+	delete h_hitProjB;
+	delete h_trkProjR;
+	delete h_trkProjB;
+
+}
+
+bool Efficiency::biasElecRow(const double& yPos, const Event &event) {
+
+	double pitchY = event.dut->getPitchY();
+	double yMin = (0.5 * pitchY) - 5.0;
+	double yMax = (0.5 * pitchY) + 5.0;
+
+	// Is the track in a row position in the bias electrode band: 10um wide in Y
+	// Original used hard-coded values... this should be equivalent (BJD)
+	if (yPos > yMin and yPos < yMax) {
+		return true;
+	}
+	if (yPos > (pitchY + yMin) and yPos < (pitchY + yMax)) {
+		return true;
+	}
+	//if( yPos > 20. && yPos < 30. ) { return true;}
+	//if( yPos > (event.dut->getPitchY()+20.) && yPos < (event.dut->getPitchY()+30.) ) { return true;}
+	return false;
+
+}
+
+bool Efficiency::readoutElecRow(const double& yPos, const Event &event) {
+
+	double yMin = event.dut->getPitchY() - 5.0;
+	double yMax = event.dut->getPitchY() + 5.0;
+
+	// Is the track in a row position in the bias electrode band: 10um wide in Y
+	// Original used hard-coded values... this should be equivalent (BJD)
+	if (yPos > yMin and yPos < yMax) {
+		return true;
+	}
+	//if(ypos > 45. && ypos < 55. ) { return true;}
+	return false;
+
+}
+
+void Efficiency::SetAspectStyle(TH1* h) {
+
+	h->GetYaxis()->SetTickLength(0.01);
+
+	// Reduce the axis label entries
+	//h->GetXaxis()->SetNdivisions(8);
+	int nDivX = (int) (h->GetXaxis()->GetXmax() / 99.0);
+	h->GetXaxis()->SetNdivisions(nDivX);
+	h->GetYaxis()->SetNdivisions(3);
+	h->GetXaxis()->SetLabelOffset(0.005);
+	h->GetYaxis()->SetLabelOffset(0.01);
+	h->GetXaxis()->SetLabelSize(0.12);
+	h->GetYaxis()->SetLabelSize(0.12);
+	h->SetTitle(";;");
+
+	return;
+
+}
+

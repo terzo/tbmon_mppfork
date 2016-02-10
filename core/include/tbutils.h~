@@ -1,0 +1,64 @@
+#ifndef TBUTILS_H
+#define TBUTILS_H
+
+#include <assert.h>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+
+#include "TF1.h"
+#include "TGraph.h"
+#include "TH1.h"
+#include "TH1D.h"
+#include "TLatex.h"
+#include "TMath.h"
+#include "TObjString.h"
+#include "TPave.h"
+#include "TROOT.h"
+#include "TStyle.h"
+
+#include "event.h"
+#include "Track.h"
+
+namespace tbutils{
+  bool inCentralRegion(PllHit* hit, const Event& event);
+  //bool trackInCentralRegion(const double& trackX,const double& trackY);
+  bool isMatch(const PllHit* const hit, const Event &event);
+  int getCol(double trackX, const Event &event);
+  int getRow(double trackY, const Event &event);
+  
+  //Find the distance of the track to the edges/points of the pixel 
+  double getTrackEdgeDistance(const double& trackX, const double& p );
+  double getTrackEdgeDistance(const Event &event, TString side);
+  double getTrackTwoPixelEdgeDistance(const double& trackX, const double& p );
+  double getTrackTwoPixelEdgeDistance(const Event &event, TString side);
+  double getTrackElectrodeDistance(const double& trackX, const double& p, const int& nelectrodes);
+
+  double getFoldedX(const Event& event);
+  double getFoldedY(const Event& event);
+
+  double getPixelY(const Event& event);
+
+  //Dump the event info
+  void dumpEventInfo(const Event& event);
+
+  bool NAND(bool a, bool b);
+  bool XOR(bool a, bool b);
+  
+  double turnon_v2(Double_t *x, Double_t *par);
+  TF1* GetGausLineFit(TObject* h,TString s,double xmin,double xmax,
+		      double hp,double sl,double pla);
+  void myText(Double_t x,Double_t y,Color_t color,const char *text);
+  void myMultiLineText(Double_t x1,Double_t y1, TString text,
+		       Color_t boxcolor, Color_t textcolor);
+
+  void atlasHistStyle();
+  void HistStyle();
+  double fitFuncBox(double *v, double *par);
+  double fitFunc(double *v, double *par);
+  double multiG(double *v, double *par);
+  void Norm(TH1* histo, double norm, Int_t IncludeOUBin=1);
+  
+
+};
+#endif //TBUTILS_H

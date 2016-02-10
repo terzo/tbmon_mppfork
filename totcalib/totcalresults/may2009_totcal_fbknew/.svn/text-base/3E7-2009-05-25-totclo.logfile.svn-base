@@ -1,0 +1,1468 @@
+
+Logfile format version: 6
+TurboPLL serial number: 1
+TurboPLL VHDL version number: 15
+TurboPLL VME base address: 0x10000000
+TurboPCC/PICT serial number: 41
+TurboPCC/PICT version number: 31
+Data was received from TurboPCC channel 2
+Custom scan description:
+
+
+Scan commenced at 10:38:44 on 05-25-2009
+
+TurboDAQ VERSION 6.71
+
+PCC type (0 = LBNL, 1 = Siegen, 2 = PICT, 3 = TurboPCC)
+3
+
+GENERAL SCAN OPTIONS:
+
+Inner scan variable (see later for details)
+24
+Inner scan start value
+70
+Inner scan end value
+950
+Inner scan number of points
+23
+Inner scan points mode (0 = Read from file, 1 = Equal distribution)
+1
+Inner scan points file if applicable
+
+Outer scan variable (see later for details)
+0
+Outer scan start value
+0
+Outer scan end value
+1
+Outer scan number of points
+2
+Outer scan points mode (0 = Read from file, 1 = Equal distribution)
+1
+Outer scan points file if applicable
+scans/example.dat
+Number of events per point
+100
+Number of mask steps
+32
+Scan mask mode (0 = Staged, 1 = Static)
+0
+Shift mask option (see later for details)
+4
+Scan mask file if applicable
+32-STAGE-MASK
+Mask staging mode (see later for details)
+0
+Static mode option (0 = Regular mode, 1 = FEs all off when not scanned)
+0
+Module scan mode (0 = Concurrent, 1 = Chip-by-chip)
+1
+PICT scan parameter 1 (see later for details)
+0
+PICT scan parameter 2 (see later for details)
+0
+Measure currents during scan (0 = Don't, 1 = Do)
+0
+
+START OF SCAN RESET OPTIONS:
+
+FE soft reset (0 = No, 1 = Yes)
+0
+FE hard reset (0 = No, 1 = Yes)
+1
+FE short SYNC (0 = No, 1 = Yes)
+1
+FE medium SYNC (0 = No, 1 = Yes)
+1
+FE long SYNC (0 = No, 1 = Yes)
+1
+MCC BCR (0 = No, 1 = Yes)
+1
+MCC ECR (0 = No, 1 = Yes)
+1
+
+TRIGGER CONCERNS:
+
+TurboPLL trigger type (0 = Internal, 1 = External)
+0
+TurboPLL trigger mode (0 = Not hitbus, 1 = Hitbus, 2 = Self trigger)
+0
+Number of accepts (1-16 BCO units)
+16
+Trigger delay (BCO units)
+250
+FE latency
+255
+
+STROBE PROPERTIES:
+
+Event interval (16XBCO units, i.e. 400ns at 40MHz)
+200
+Strobe length (BCO units)
+500
+VCAL-LOW magnitude (VCAL if old PCC)
+0
+VCAL-HIGH magnitude 
+0
+FE VCAL magnitude (FE-I only)
+200
+Strobe leading edge delay (DTC units)
+0
+Strobe trailing edge delay (PICT/TPCC only)
+0
+FE strobe/injection mode (0 = Digital, 1 = Analogue internal, 2 = Analogue external)
+1
+MCC strobe delay range (0 - 16)
+0
+MCC strobe delay (0 - 64)
+0
+
+DATA TREATMENT OPTIONS:
+
+PLL acquisition mode (0 = FIFO, 1 = SRAM)
+1
+SRAM storage option (0 = Raw data, 1 = Histogrammed data)
+1
+Error logging (0 = Off, 1 = On)
+0
+Cluster acquisition option (0 = Accept all hits, 1 = Discard clusters)
+0
+Raw output stream toggle (0 = Off, 1 = On)
+0
+Binned output stream toggle (0 = Off, 1 = On)
+0
+Binned TOT output stream toggle (0 = Off, 1 = On)
+1
+Fitted s-curves output stream toggle (0 = Off, 1 = On)
+0
+TDACs/FDACs output stream toggle (0 = Off, 1 = TDACs, 2 = FDACs)
+0
+TOT calibration output stream toggle (0 = Off, 1 = On)
+1
+Chi-squared cut for s-curve fits
+50.000000
+Global custom conversion factor
+44.700000
+Global custom offset
+0.000000
+S-curves data truncation plateau
+100
+TDAC slice point 1
+-3.750000
+TDAC slice point 2
+-3.500000
+TDAC slice point 3
+-3.250000
+TDAC slice point 4
+-3.000000
+TDAC slice point 5
+-2.750000
+TDAC slice point 6
+-2.500000
+TDAC slice point 7
+-2.250000
+TDAC slice point 8
+-2.000000
+TDAC slice point 9
+-1.750000
+TDAC slice point 10
+-1.500000
+TDAC slice point 11
+-1.250000
+TDAC slice point 12
+-1.000000
+TDAC slice point 13
+-0.750000
+TDAC slice point 14
+-0.500000
+TDAC slice point 15
+-0.250000
+TDAC slice point 16
+0.000000
+TDAC slice point 17
+0.250000
+TDAC slice point 18
+0.500000
+TDAC slice point 19
+0.750000
+TDAC slice point 20
+1.000000
+TDAC slice point 21
+1.250000
+TDAC slice point 22
+1.500000
+TDAC slice point 23
+1.750000
+TDAC slice point 24
+2.000000
+TDAC slice point 25
+2.250000
+TDAC slice point 26
+2.500000
+TDAC slice point 27
+2.750000
+TDAC slice point 28
+3.000000
+TDAC slice point 29
+3.250000
+TDAC slice point 30
+3.500000
+TDAC slice point 31
+3.750000
+VCAL scale for external injection (mV/count)
+0.036600
+Calibration option (0 = Global-custom, 1 = Charge from FE calibration, 2 = Time, from MCC calibration)
+1
+TOT calibration fit initial coefficient 0
+150.000000
+TOT calibration fit initial coefficient 1
+-4000000.000000
+TOT calibration fit initial coefficient 2
+30000.000000
+TDAC tuning algorithm (0 = slice up 1D distribution, 1 = exp interpolation (2D), 2 = Scan all TDACs, 3 = Auto)
+2
+
+GPIB RELATED OPTIONS:
+
+GPIB auxiliary device 1 (see later for details)
+0
+GPIB aux1 address
+17
+GPIB auxiliary device 2 (see later for details)
+0
+GPIB aux2 address
+18
+FDAC-tune matching charge
+20000.000000
+Keithley 2410 measurement settling delay
+10
+Keithley 2410 measurement stability requirement (%)
+1.000000
+
+FE CONCERNS:
+
+MONMUX (see later for details)
+1
+Injection mode (0 = C_Low, 1 = C_High)
+0
+Phi frequency ( 0 = OFF, 1 = 10, 2 = 20, 3 = 40MHz)
+3
+TOT thresholds mode (0 = Both off, 1 = Minimum only, 2 = Doubling only, 3 = Both active)
+0
+TOT minimum threshold (0-255)
+0
+TOT hit-doubling upper threshold (0-255)
+32
+Global hitbus enable (0 = Off, 1 = On)
+1
+FE Capacitance measurement control parameter
+0
+Test pixel buffer enable (0 = Off, 1 = On)
+0
+Test pixel buffer MUX (0 = Chopper out, 1 = Preamp out, 2 = 2nd stage +ve out, 3 = 2nd stage -ve out)
+0
+Test pixel buffer boost (0 = Off, 1 = On)
+0
+VCAL measure enable (0 = Off, 1 = On)
+0
+MON DAC selection (hexadecimal, see end for details)
+0
+TOT data field mode (Bits 0,1: 0 = TOT, 1 = LE timestamp, 3 = TE. Bit 2: 0 = 8-bit without parity, 1 = 7-bit with parity)
+0
+
+MCC OPTIONS:
+
+MCC error flag checking toggle (0 = Off, 1 = On)
+1
+MCC individual FE check enable (0 = Off, 1 = On)
+1
+MCC FE timestamp comparison check (0 = Off, 1 = On)
+0
+MCC output bandwidth (0 = 40MHz single-link, 1 = 40MHz dual, 2 = 80MHz single, 3 = 80MHz dual)
+3
+
+PICT PARAMETERS:
+
+PICT DAC Channel 0 (see later for details)
+0
+PICT DAC Channel 1 (see later for details)
+0
+PICT DAC Channel 2 (see later for details)
+0
+PICT DAC Channel 3 (see later for details)
+0
+PICT DAC Channel 4 (see later for details)
+0
+PICT DAC Channel 5 (see later for details)
+0
+PICT DAC Channel 6 (see later for details)
+0
+PICT DAC Channel 7 (see later for details)
+0
+PICT DAC Channel 8 (see later for details)
+0
+PICT DAC Channel 9 (see later for details)
+0
+PICT DAC Channel 10 (see later for details)
+0
+PICT DAC Channel 11 (see later for details)
+0
+PICT DAC Channel 12 (see later for details)
+0
+PICT DAC Channel 13 (see later for details)
+0
+PICT DAC Channel 14 (see later for details)
+0
+PICT DAC Channel 15 (see later for details)
+0
+PICT DAC Channel 16 (see later for details)
+0
+PICT DAC Channel 17 (see later for details)
+0
+PICT DAC Channel 18 (see later for details)
+0
+PICT DAC Channel 19 (see later for details)
+0
+PICT DAC Channel 20 (see later for details)
+0
+PICT DAC Channel 21 (see later for details)
+0
+PICT DAC Channel 22 (see later for details)
+0
+PICT DAC Channel 23 (see later for details)
+0
+PICT DAC Channel 24 (see later for details)
+0
+PICT DAC Channel 25 (see later for details)
+0
+PICT DAC Channel 26 (see later for details)
+0
+PICT DAC Channel 27 (see later for details)
+0
+PICT DAC Channel 28 (see later for details)
+0
+PICT DAC Channel 29 (see later for details)
+0
+PICT DAC Channel 30 (see later for details)
+0
+PICT DAC Channel 31 (see later for details)
+0
+PICT DAC Channel 32 (see later for details)
+0
+PICT DAC Channel 33 (see later for details)
+0
+PICT DAC Channel 34 (see later for details)
+0
+PICT DAC Channel 35 (see later for details)
+0
+PICT DAC Channel 36 (see later for details)
+0
+PICT DAC Channel 37 (see later for details)
+0
+PICT DAC Channel 38 (see later for details)
+0
+PICT DAC Channel 39 (see later for details)
+0
+PICT DAC Channel 40 (see later for details)
+0
+PICT DAC Channel 41 (see later for details)
+0
+PICT DAC Channel 42 (see later for details)
+0
+PICT DAC Channel 43 (see later for details)
+0
+PICT DAC Channel 44 (see later for details)
+0
+PICT DAC Channel 45 (see later for details)
+0
+PICT DAC Channel 46 (see later for details)
+0
+PICT DAC Channel 47 (see later for details)
+0
+PICT DAC Channel 48 (see later for details)
+0
+PICT DAC Channel 49 (see later for details)
+0
+PICT DAC Channel 50 (see later for details)
+0
+PICT DAC Channel 51 (see later for details)
+0
+PICT DAC Channel 52 (see later for details)
+0
+PICT DAC Channel 53 (see later for details)
+0
+PICT DAC Channel 54 (see later for details)
+0
+PICT DAC Channel 55 (see later for details)
+0
+PICT DAC Channel 56 (see later for details)
+0
+PICT DAC Channel 57 (see later for details)
+0
+PICT DAC Channel 58 (see later for details)
+0
+PICT DAC Channel 59 (see later for details)
+0
+PICT DAC Channel 60 (see later for details)
+0
+PICT DAC Channel 61 (see later for details)
+0
+PICT DAC Channel 62 (see later for details)
+0
+PICT DAC Channel 63 (see later for details)
+0
+PICT DAC Channel 64 (see later for details)
+0
+PICT DAC Channel 65 (see later for details)
+0
+PICT DAC Channel 66 (see later for details)
+0
+PICT DAC Channel 67 (see later for details)
+0
+PICT GA setting
+0
+PICT GA enable
+0
+PICT/TPCC DO mode (0 = -ve, 1 = +ve)
+1
+PICT relay enable (0 = Off, 1 = On)
+1
+PICT A/D-Over enable (0 = Off, 1 = On)
+1
+PICT IVDD measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT IVDDA measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT IVCCA measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT ILEAK measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT CAPM measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT AOVER measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT DOVER measurement gain (0 = X1, 1 = X10, 2 = X100, 3 = X1000).
+1
+PICT Temperature limit chip 0.
+100
+PICT Temperature limit chip 1.
+100
+PICT monitor enable 2 (VCAL)
+1
+PICT monitor enable 3 (VCCA)
+1
+PICT monitor enable 4 (VDDA)
+1
+PICT monitor enable 5 (VDD)
+1
+PICT monitor enable 6 (MONCAL)
+1
+PICT monitor enable 7 (POWERON)
+1
+PICT monitor enable 8 (MONDAC)
+1
+PICT monitor enable 9 (MONREF)
+1
+PICT monitor enable 10 (VMONLEAK)
+1
+PICT monitor enable 11 (VCAPMEAS)
+1
+PICT monitor enable 12 (VAOVER)
+1
+PICT monitor enable 13 (VDOVER)
+1
+PICT monitor enable 14 (ALINEAROUT)
+1
+PICT monitor enable 15 (DGND)
+1
+PICT monitor enable 16 (IVDD_LO)
+1
+PICT monitor enable 17 (IVDD_HI)
+1
+PICT monitor enable 18 (IVDDA_LO)
+1
+PICT monitor enable 19 (IVDDA_HI)
+1
+PICT monitor enable 20 (IVCCA_LO)
+1
+PICT monitor enable 21 (IVCCA_HI)
+1
+PICT refreset (0 = Off, 1 = On)
+0
+PICT refreset enable (0 = Off, 1 = On)
+0
+PICT clock mode (0 = Off, 1 = On)
+1
+PICT driver mode (0 = Off, 1 = On)
+1
+
+Scan constants:
+NO SCAN          0
+DAC0             1
+DAC1             2
+DAC2             3
+DAC3             4
+DAC4             5
+DAC5             6
+DAC6             7
+DAC7             8
+DAC8             9
+DAC9             10
+DAC10            11
+DAC11            12
+LATENCY          13
+ALL TDACS        14
+ALL FDACS        15
+VCAL             20
+TRIGGER DELAY    21
+STROBE DELAY     22
+STROBE DURATION  23
+VCAL FE          24
+MCC STROBE DELAY 25
+STROBE TE DELAY 30
+VCAL_LOW        31
+VCAL_HIGH       32
+VCAL_DIFF       33
+STROBE LE & TE  34
+GPIB AUX1       40
+GPIB AUX2       41
+PICT 1          50
+PICT 2          51
+
+Mask staging modes:
+Enable and Select Staged (Preamp Static) 0
+Select Staged, (Enable, Preamp Static)   1
+Special Mode for Crosstalk               2
+Enable Staged, (Select, Preamp Static)   3
+Enable, Select and Preamp Masks Staged   4
+Special Mode for MONLeak or IPMON        5
+Select and Preamp Staged (Enable Static) 6
+Hitbus Scaler Mode for Noise Occupancy   100
+Hitbus Scaler Mode for Digital Injection 101
+Hitbus Scaler Mode for Analog Injection  102
+
+Shift mask options:
+FROM FILE     0
+10 STEP       1
+16 STEP       2
+20 STEP       3
+32 STEP       4
+40 STEP       5
+64 STEP       6
+80 STEP       7
+160 STEP      8
+320 STEP      9
+2880 STEP    10
+16 STEP 0-9  11
+20 STEP 0-9  12
+32 STEP 0-9  13
+40 STEP 0-9  14
+64 STEP 0-9  15
+80 STEP 0-9  16
+160 STEP 0-9 17
+320 STEP 0-9 18
+5 STEP       19
+8 STEP       20
+
+GPIB device options:
+NONE                0
+2 X K2410 IV SCAN   1
+HP8116A V-HIGH      2
+LC9210 V-HIGH       3
+HPA V-HIGH          4
+K2410V VOLTAGE      5
+HP3631 6V VOLTS     6
+HP3631 +25V VOLTS   7
+HP3631 -25V VOLTS   8
+LC9210 DELAY        9
+LC9210 V-LOW       13
+1 X K2410 IV SCAN  14
+
+MON MUX options:
+GLOBCLK    0
+HITBUS     1
+SOFTRSTB   2
+SERDATA    3
+MONSEL     4
+PIXCLK     5
+DGND       6
+DVDD       7
+EVENT      8
+COMMAND    9
+READFIFO   10
+PIXEL      11
+ACCEPT     12
+ROCK       13
+GLOBSEROUT 14
+GLOBAL     15
+
+MON DAC options:
+NULL    0x0000
+ADC	    0x0001
+ADCREF  0x0002
+IVDD2   0x0004
+ID	    0x0008
+IP2	    0x0010
+IP	    0x0020
+THRTRIM 0x0040
+IFDAC   0x0080
+ITRIMIF 0x0100
+VCAL	0x0200
+ANAREF  0x0400
+ITH1	0x0800
+ITH2	0x1000
+IL	    0x2000
+IL2	    0x4000
+SPARE   0x8000
+
+PICT parameter options:
+DELAY OF XCKP     0
+DELAY OF XCKN     1
+DELAY OF DCIP     2
+DELAY OF DCIN     3
+DELAY OF LV1P     4
+DELAY OF LV1N     5
+DELAY OF SYNCP    6
+DELAY OF SYNCN    7
+DELAY OF LD	      8
+DELAY OF DI	      9
+DELAY OF CCK      10
+WIDTH OF XCKP     11
+WIDTH OF XCKN     12
+WIDTH OF DCIP     13
+WIDTH OF DCIN     14
+WIDTH OF LV1P     15
+WIDTH OF LV1N     16
+WIDTH OF SYNCP    17
+WIDTH OF SYNCN    18
+WIDTH OF LD	      19
+WIDTH OF DI	      20
+WIDTH OF CCK      21
+DELAY OF DOP	  22
+DELAY OF DON	  23
+DELAY OF DO2P     24
+DELAY OF DO2N     25
+DELAY OF XCKR     26
+WIDTH OF DOP	  27
+WIDTH OF DON	  28
+WIDTH OF DO2P     29
+WIDTH OF DO2N     30
+WIDTH OF XCKR     31
+THRESHOLD OF DOP  32
+THRESHOLD OF DON  33
+THRESHOLD OF DO2P 34
+THRESHOLD OF DO2N 35
+V_HIGH OF RSTB    36
+V_HIGH OF LD	  37
+V_HIGH OF DI	  38
+V_HIGH OF CCK     39
+V_HIGH OF XCKP    40
+V_HIGH OF XCKN    41
+V_HIGH OF DCIP    42
+V_HIGH OF DCIN    43
+V_HIGH OF LV1P    44
+V_HIGH OF LV1N    45
+V_HIGH OF SYNCP   46
+V_HIGH OF SYNCN   47
+V_HIGH OF STRP    48
+V_HIGH OF STRN    49
+V_LOW OF RSTB     50
+V_LOW OF LD	      51
+V_LOW OF DI	      52
+V_LOW OF CCK      53
+V_LOW OF XCKP     54
+V_LOW OF XCKN     55
+V_LOW OF DCIP     56
+V_LOW OF DCIN     57
+V_LOW OF LV1P     58
+V_LOW OF LV1N     59
+V_LOW OF SYNCP    60
+V_LOW OF SYNCN    61
+V_LOW OF STRP     62
+V_LOW OF STRN     63
+
+PICT DAC Channels:
+DELAY XCKP     0
+DELAY XCKN     1
+DELAY DCIP     2
+DELAY DCIN     3
+DELAY LV1P     4
+DELAY LV1N     5
+DELAY SYNCP    6
+DELAY SYNCN    7
+DELAY LD	   8
+DELAY DI	   9
+DELAY CCK      10
+WIDTH XCKP     11
+WIDTH XCKN     12
+WIDTH DCIP     13
+WIDTH DCIN     14
+WIDTH LV1P     15
+WIDTH LV1N     16
+WIDTH SYNCP    17
+WIDTH SYNCN    18
+WIDTH LD	   19
+WIDTH DI	   20
+WIDTH CCK      21
+DELAY DOP	   22
+DELAY DON	   23
+DELAY DO2P     24
+DELAY DO2N     25
+DELAY XCKR     26
+WIDTH DOP	   27
+WIDTH DON	   28
+WIDTH DO2P     29
+WIDTH DO2N     30
+WIDTH XCKR     31
+THRESHOLD DOP  32
+THRESHOLD DON  33
+THRESHOLD DO2P 34
+THRESHOLD DO2N 35
+VHI RSTB       36
+VHI LD	       37
+VHI DI	       38
+VHI CCK        39
+VHI XCKP       40
+VHI XCKN       41
+VHI DCIP       42
+VHI DCIN       43
+VHI LV1P       44
+VHI LV1N       45
+VHI SYNCP      46
+VHI SYNCN      47
+VHI STRP       48
+VHI STRN       49
+VLO RSTB       50
+VLO LD	       51
+VLO DI	       52
+VLO CCK        53
+VLO XCKP       54
+VLO XCKN       55
+VLO DCIP       56
+VLO DCIN       57
+VLO LV1P       58
+VLO LV1N       59
+VLO SYNCP      60
+VLO SYNCN      61
+VLO STRP       62
+VLO STRN       63
+UNUSED         64
+UNUSED 	       65
+AOVER          66
+DOVER          67
+TurboDAQ VERSION 6.71
+
+Assembly type (0 = Single-chip, 1 = Module)
+0
+MCC flavour if applicable (1 = MCC-I1, 2 = MCC-I2)
+0
+FE flavour (0 = FE-I1, 1 = FE-I2)
+1
+
+CHIP 0:
+
+Chip 0 geographical address (0-15)
+0
+Chip 0 global configuration enable (0 = off, 1 = on)
+1
+Chip 0 global scan/readout enable (0 = off, 1 = on)
+1
+Chip 0 DACs enable (0 = off, 1 = on)
+1
+Chip 0 Global Threshold DAC
+13
+Chip 0 IVDD2 DAC
+64
+Chip 0 ID DAC
+64
+Chip 0 IP2 DAC
+64
+Chip 0 IP DAC
+64
+Chip 0 TRIMT DAC
+64
+Chip 0 IF DAC
+11
+Chip 0 TRIMF DAC
+16
+Chip 0 ITH1 DAC
+0
+Chip 0 ITH2 DAC
+0
+Chip 0 IL DAC
+64
+Chip 0 IL2 DAC
+64
+Chip 0 column-pair mask parameter
+511
+Chip 0 Timestamp enable (0 = OFF, 1 = ON)
+1
+Chip 0 Decoupling capacitor enable (0 = OFF, 1 = ON)
+0
+Chip 0 readout mask mode (see end for details)
+1
+Chip 0 readout mask file (if appl.)
+ALL=0
+Chip 0 strobe mask mode (see end for details)
+1
+Chip 0 strobe mask file (if appl.)
+ALL=0
+Chip 0 preamp kill mask mode (FE-I only)
+2
+Chip 0 preamp mask file (if appl.)
+ALL=1
+Chip 0 hitbus mask mode (FE-I only)
+2
+Chip 0 hitbus mask file (if appl.)
+ALL=1
+Chip 0 TDAC mode (n = all n (for n = 0-31), 128 = alternative file)
+128
+Chip 0 TDAC file
+MFBK3E7-06152/tdacs/2009-05-25_tdacs_0.out
+Chip 0 FDAC mode (n = all n (for n = 0-31), 128 = alternative file)
+128
+Chip 0 FDAC file
+MFBK3E7-06152/fdacs/2009-05-25_fdacs_0.out
+
+Calibration Parameters:
+
+Chip 0 Cinj-LO (fF)
+7.581
+Chip 0 Cinj-HI (fF)
+43.751
+Chip 0 VCAL-FE coefficients (V(mV) = [0]*vcal**3+[1]*vcal**2+[2]*vcal+[3])
+0 0 0.956 0
+Chip 0 Internal-injection offset correction (VCAL-FE counts)
+0
+
+TPLL XCKr phase
+9
+
+MCC CAL strobe-delay range 0: calibration factor (ns/count)
+0.43
+MCC CAL strobe-delay range 1: calibration factor (ns/count)
+0.56
+MCC CAL strobe-delay range 2: calibration factor (ns/count)
+0.69
+MCC CAL strobe-delay range 3: calibration factor (ns/count)
+0.83
+MCC CAL strobe-delay range 4: calibration factor (ns/count)
+0.97
+MCC CAL strobe-delay range 5: calibration factor (ns/count)
+1.11
+MCC CAL strobe-delay range 6: calibration factor (ns/count)
+1.25
+MCC CAL strobe-delay range 7: calibration factor (ns/count)
+1.4
+MCC CAL strobe-delay range 8: calibration factor (ns/count)
+1.54
+MCC CAL strobe-delay range 9: calibration factor (ns/count)
+1.68
+MCC CAL strobe-delay range 10: calibration factor (ns/count)
+1.82
+MCC CAL strobe-delay range 11: calibration factor (ns/count)
+1.96
+MCC CAL strobe-delay range 12: calibration factor (ns/count)
+2.1
+MCC CAL strobe-delay range 13: calibration factor (ns/count)
+2.24
+MCC CAL strobe-delay range 14: calibration factor (ns/count)
+2.38
+MCC CAL strobe-delay range 15: calibration factor (ns/count)
+2.53
+
+Module string identifier
+FBK3E7-06152
+
+Mean T0 scan strobe delay result:
+0
+Delay range used in T0 scan:
+5
+Trigger delay used in T0 scan:
+0
+
+Static mask options:
+ALTERNATIVE FILE       0
+ALL OFF                1
+ALL ON                 2
+ODDS ON                3
+EVENS ON               4
+COLUMNS 0-9            5
+COLUMNS 0-1            6
+COLUMNS 2-3            7
+COLUMNS 4-5            8
+COLUMNS 6-7            9
+COLUMNS 8-9           10
+COLUMNS 10-11         11
+COLUMNS 12-13         12
+COLUMNS 14-15         13
+COLUMNS 16-17         14
+ALL ON EXCEPT GANGED  15
+COLUMNS 0_9 NO GANGED 16
+TurboDAQ VERSION 6.71
+
+TPCC Supply GPIB address
+5
+TPCC Supply ramp step (V)
+5.000000
+TPCC Supply channel-1 voltage (V)
+4.928298
+TPCC Supply channel-2 voltage (V)
+0.006055
+TPCC Supply channel-3 voltage (V)
+5.002550
+TPCC Supply voltage limit (V)
+5.500000
+TPCC Supply current limit (mA)
+1600.000000
+
+LV Supply 1 GPIB address
+6
+LV Supply 1 ramp step (V)
+0.200000
+LV Supply 1 channel-1 voltage (V)
+1.607037
+LV Supply 1 channel-2 voltage (V)
+1.993307
+LV Supply 1 channel-3 voltage (V)
+0.000367
+LV Supply 1 voltage limit (V)
+2.500000
+LV Supply 1 current limit (mA)
+1600.000000
+
+LV Supply 2 GPIB address
+7
+LV Supply 2 ramp step (V)
+0.200000
+LV Supply 2 channel-1 voltage (V)
+1.600000
+LV Supply 2 channel-2 voltage (V)
+2.000000
+LV Supply 2 channel-3 voltage (V)
+0.000000
+LV Supply 2 voltage limit (V)
+2.500000
+LV Supply 2 current limit (mA)
+1600.000000
+
+LV Supply 3 GPIB address
+8
+LV Supply 3 ramp step (V)
+0.200000
+LV Supply 3 channel-1 voltage (V)
+1.600000
+LV Supply 3 channel-2 voltage (V)
+2.000000
+LV Supply 3 channel-3 voltage (V)
+0.000000
+LV Supply 3 voltage limit (V)
+2.500000
+LV Supply 3 current limit (mA)
+1600.000000
+
+LV Supply 4 GPIB address
+9
+LV Supply 4 ramp step (V)
+0.200000
+LV Supply 4 channel-1 voltage (V)
+1.600000
+LV Supply 4 channel-2 voltage (V)
+2.000000
+LV Supply 4 channel-3 voltage (V)
+0.000000
+LV Supply 4 voltage limit (V)
+2.500000
+LV Supply 4 current limit (mA)
+1600.000000
+
+HV Supply 1 GPIB address
+10
+HV Supply 1 ramp step (V)
+10.000000
+HV Supply 1 bias voltage (V)
+-8.000000
+HV Supply 1 voltage limit (V)
+200.000000
+HV Supply 1 current limit (uA)
+200.000000
+
+HV Supply 2 GPIB address
+11
+HV Supply 2 ramp step (V)
+10.000000
+HV Supply 2 bias voltage (V)
+0.000000
+HV Supply 2 voltage limit (V)
+200.000000
+HV Supply 2 current limit (uA)
+200.000000
+
+HV Supply 3 GPIB address
+12
+HV Supply 3 ramp step (V)
+10.000000
+HV Supply 3 bias voltage (V)
+0.000000
+HV Supply 3 voltage limit (V)
+200.000000
+HV Supply 3 current limit (uA)
+200.000000
+
+HV Supply 4 GPIB address
+13
+HV Supply 4 ramp step (V)
+10.000000
+HV Supply 4 bias voltage (V)
+0.000000
+HV Supply 4 voltage limit (V)
+200.000000
+HV Supply 4 current limit (uA)
+200.000000
+
+Scan points for inner scan (if applicable):
+70
+110
+150
+190
+230
+270
+310
+350
+390
+430
+470
+510
+550
+590
+630
+670
+710
+750
+790
+830
+870
+910
+950
+
+Static readout mask used for chip 0:
+       0        0        0        0        0        0
+       1        0        0        0        0        0
+       2        0        0        0        0        0
+       3        0        0        0        0        0
+       4        0        0        0        0        0
+       5        0        0        0        0        0
+       6        0        0        0        0        0
+       7        0        0        0        0        0
+       8        0        0        0        0        0
+       9        0        0        0        0        0
+       a        0        0        0        0        0
+       b        0        0        0        0        0
+       c        0        0        0        0        0
+       d        0        0        0        0        0
+       e        0        0        0        0        0
+       f        0        0        0        0        0
+      10        0        0        0        0        0
+      11        0        0        0        0        0
+
+Static strobe mask used for chip 0:
+       0        0        0        0        0        0
+       1        0        0        0        0        0
+       2        0        0        0        0        0
+       3        0        0        0        0        0
+       4        0        0        0        0        0
+       5        0        0        0        0        0
+       6        0        0        0        0        0
+       7        0        0        0        0        0
+       8        0        0        0        0        0
+       9        0        0        0        0        0
+       a        0        0        0        0        0
+       b        0        0        0        0        0
+       c        0        0        0        0        0
+       d        0        0        0        0        0
+       e        0        0        0        0        0
+       f        0        0        0        0        0
+      10        0        0        0        0        0
+      11        0        0        0        0        0
+
+Preamp kill/enable mask used for chip 0:
+       0 ffffffff ffffffff ffffffff ffffffff ffffffff
+       1 ffffffff ffffffff ffffffff ffffffff ffffffff
+       2 ffffffff ffffffff ffffffff ffffffff ffffffff
+       3 ffffffff ffffffff ffffffff ffffffff ffffffff
+       4 ffffffff ffffffff ffffffff ffffffff ffffffff
+       5 ffffffff ffffffff ffffffff ffffffff ffffffff
+       6 ffffffff ffffffff ffffffff ffffffff ffffffff
+       7 ffffffff ffffffff ffffffff ffffffff ffffffff
+       8 ffffffff ffffffff ffffffff ffffffff ffffffff
+       9 ffffffff ffffffff ffffffff ffffffff ffffffff
+       a ffffffff ffffffff ffffffff ffffffff ffffffff
+       b ffffffff ffffffff ffffffff ffffffff ffffffff
+       c ffffffff ffffffff ffffffff ffffffff ffffffff
+       d ffffffff ffffffff ffffffff ffffffff ffffffff
+       e ffffffff ffffffff ffffffff ffffffff ffffffff
+       f ffffffff ffffffff ffffffff ffffffff ffffffff
+      10 ffffffff ffffffff ffffffff ffffffff ffffffff
+      11 ffffffff ffffffff ffffffff ffffffff ffffffff
+
+Hitbus mask used for chip 0:
+       0 ffffffff ffffffff ffffffff ffffffff ffffffff
+       1 ffffffff ffffffff ffffffff ffffffff ffffffff
+       2 ffffffff ffffffff ffffffff ffffffff ffffffff
+       3 ffffffff ffffffff ffffffff ffffffff ffffffff
+       4 ffffffff ffffffff ffffffff ffffffff ffffffff
+       5 ffffffff ffffffff ffffffff ffffffff ffffffff
+       6 ffffffff ffffffff ffffffff ffffffff ffffffff
+       7 ffffffff ffffffff ffffffff ffffffff ffffffff
+       8 ffffffff ffffffff ffffffff ffffffff ffffffff
+       9 ffffffff ffffffff ffffffff ffffffff ffffffff
+       a ffffffff ffffffff ffffffff ffffffff ffffffff
+       b ffffffff ffffffff ffffffff ffffffff ffffffff
+       c ffffffff ffffffff ffffffff ffffffff ffffffff
+       d ffffffff ffffffff ffffffff ffffffff ffffffff
+       e ffffffff ffffffff ffffffff ffffffff ffffffff
+       f ffffffff ffffffff ffffffff ffffffff ffffffff
+      10 ffffffff ffffffff ffffffff ffffffff ffffffff
+      11 ffffffff ffffffff ffffffff ffffffff ffffffff
+
+TDAC settings used for chip 0:
+67 40 57 62 51 77 67 71 64 57 64 57 43 66 50 73 71 67 
+61 64 74 54 57 62 63 76 82 62 76 72 80 69 62 54 58 56 
+46 71 74 66 65 56 46 70 66 75 70 56 58 73 57 75 61 68 
+40 63 68 46 54 51 70 63 61 57 69 70 56 54 68 65 57 66 
+68 66 71 68 59 78 81 71 53 69 79 78 49 68 82 81 65 70 
+64 62 64 52 86 69 59 73 57 70 49 70 63 58 62 52 68 78 
+68 65 77 67 76 67 81 45 62 68 63 83 54 66 68 70 76 72 
+52 62 67 41 37 47 67 63 50 75 68 54 63 63 57 55 72 43 
+72 58 52 70 63 55 77 47 60 79 69 66 64 77 67 76 73 53 
+51 73 61 78 77 71 49 49 59 64 53 58 79 51 62 76 65 68 
+62 71 81 83 80 67 70 67 62 69 73 65 64 65 74 68 61 66 
+70 69 67 53 69 67 59 65 73 71 65 75 60 56 62 69 49 60 
+68 64 77 67 65 72 79 71 63 80 81 79 49 73 66 66 65 89 
+73 59 58 75 68 49 55 65 61 69 56 54 76 60 66 74 53 52 
+59 56 57 73 71 60 58 59 59 63 66 57 77 53 56 63 65 78 
+57 62 70 79 46 71 68 70 72 62 60 74 61 61 65 62 62 51 
+65 65 65 67 77 66 58 80 65 65 84 60 54 65 62 62 65 58 
+72 63 52 76 69 65 67 79 63 65 64 53 65 65 65 55 61 67 
+77 69 43 62 71 75 77 69 74 52 61 66 75 68 61 60 72 65 
+65 67 65 59 69 58 70 72 78 76 64 67 66 44 66 57 50 83 
+74 67 71 75 62 64 57 61 68 87 61 76 65 47 73 64 72 83 
+54 67 72 72 62 55 67 75 65 73 73 65 86 69 71 63 74 47 
+82 62 67 78 46 62 67 76 61 64 52 77 62 63 61 81 47 79 
+93 70 68 59 69 74 53 53 79 63 69 77 81 44 73 61 66 59 
+76 64 63 68 62 74 51 57 47 71 74 77 71 55 60 66 63 58 
+69 71 76 60 60 68 66 70 66 62 62 63 71 57 63 53 78 72 
+56 59 82 68 73 68 58 51 59 75 62 73 79 55 60 83 69 51 
+45 80 90 55 60 79 77 56 77 72 55 75 76 63 79 59 71 69 
+59 59 55 70 60 54 94 56 57 63 81 69 61 74 73 58 61 52 
+62 65 63 65 67 74 56 69 58 96 79 57 71 56 64 70 79 68 
+78 58 59 69 54 74 61 58 77 62 69 76 74 83 73 63 62 63 
+60 82 48 69 46 43 65 69 66 57 52 68 67 76 59 70 61 77 
+59 69 63 77 78 90 66 43 68 75 66 70 67 68 79 66 69 73 
+64 72 77 75 69 73 60 66 58 71 55 72 70 70 70 54 74 64 
+53 60 57 72 77 81 66 51 88 88 64 49 59 72 69 80 63 68 
+64 72 53 65 62 75 53 61 50 56 61 62 53 68 69 78 76 85 
+49 60 60 82 59 63 71 74 71 77 60 59 69 56 56 64 71 60 
+56 63 75 42 75 77 56 61 62 63 53 79 79 76 55 71 78 75 
+74 64 73 69 75 59 72 60 63 83 68 73 78 72 64 59 71 56 
+71 63 57 64 67 66 52 54 71 70 87 51 52 65 62 62 48 59 
+72 72 81 82 62 62 65 70 56 60 74 72 65 68 68 58 59 66 
+48 67 59 61 59 66 67 51 53 56 63 67 71 38 56 46 60 72 
+71 85 61 69 49 78 77 58 71 81 62 75 65 61 54 72 66 61 
+60 74 65 70 72 68 61 69 74 56 54 42 52 49 69 77 69 70 
+61 83 81 79 66 84 63 55 80 64 59 77 78 73 68 59 68 83 
+73 64 63 67 83 54 57 68 80 64 71 45 69 76 65 65 70 70 
+73 57 79 56 61 73 59 77 71 70 65 83 76 85 59 68 51 70 
+59 49 66 61 76 55 71 68 67 56 75 79 68 69 59 47 54 72 
+61 66 91 63 59 85 70 71 56 64 52 78 53 83 62 47 77 71 
+79 52 63 64 84 73 39 70 69 73 74 52 46 71 54 52 73 89 
+73 53 74 50 63 74 49 70 71 48 58 70 62 79 85 57 66 61 
+58 70 71 69 72 79 60 77 48 82 76 74 59 58 59 65 60 63 
+50 57 59 56 61 68 74 67 67 69 51 70 53 59 57 59 75 71 
+78 73 55 69 77 73 54 73 70 93 61 60 60 68 70 73 68 65 
+71 77 49 86 75 90 63 67 60 79 69 67 69 58 63 70 60 70 
+62 57 84 66 65 70 81 77 64 72 60 52 78 63 63 57 67 75 
+63 57 69 66 65 59 52 74 55 70 65 56 62 63 75 57 59 68 
+56 87 55 81 75 49 55 60 56 53 74 63 65 67 73 64 83 60 
+57 69 65 80 69 61 82 65 57 76 63 60 76 70 53 62 66 68 
+61 72 73 66 67 64 62 45 80 78 76 49 68 61 46 73 67 64 
+71 71 62 57 74 66 44 65 76 61 69 69 72 74 58 62 79 79 
+53 59 83 74 56 74 52 53 74 59 47 53 70 66 59 77 62 63 
+60 65 39 81 77 65 55 59 81 68 67 62 85 60 67 70 53 64 
+72 73 60 62 75 67 83 66 69 73 67 54 53 80 46 69 83 64 
+85 74 72 69 59 72 63 75 71 57 52 54 84 66 62 69 59 71 
+47 56 60 69 56 68 62 70 92 74 69 66 73 65 58 77 64 67 
+66 65 69 62 84 63 65 53 71 52 77 61 52 74 81 83 69 78 
+71 70 71 58 56 48 78 83 67 82 56 47 75 60 47 61 68 53 
+72 82 78 68 69 63 64 78 83 68 62 77 78 57 52 59 64 59 
+66 76 68 75 67 59 69 63 60 80 54 82 59 55 63 61 67 57 
+53 63 53 79 88 69 73 66 73 70 61 73 75 64 76 85 52 69 
+47 74 67 59 64 82 63 67 75 68 71 64 58 53 51 66 74 72 
+79 53 69 69 79 63 83 61 66 78 73 61 72 73 66 44 77 62 
+56 64 68 73 78 77 49 71 72 62 67 67 66 72 67 69 63 64 
+57 69 75 80 60 74 66 56 68 75 78 65 50 61 46 75 71 75 
+68 58 57 71 56 75 79 69 79 68 70 63 73 77 61 64 61 64 
+64 70 59 59 80 64 68 66 77 63 65 69 69 73 74 77 54 66 
+56 72 80 59 65 71 59 68 68 84 75 73 42 75 53 71 78 73 
+64 94 65 82 54 68 55 69 72 82 69 52 60 68 72 59 76 78 
+67 64 66 87 78 63 68 49 69 54 71 64 59 64 64 73 66 50 
+59 68 76 70 63 76 71 65 55 52 53 61 67 82 59 71 53 60 
+60 79 58 76 69 57 51 65 75 64 54 39 66 66 80 76 69 73 
+53 62 75 64 57 53 61 82 51 77 70 74 78 59 72 67 70 64 
+69 65 54 80 70 65 70 62 57 57 84 81 71 82 52 53 70 69 
+69 63 77 74 66 63 71 68 65 71 74 85 57 64 76 65 59 74 
+68 73 71 66 62 57 71 46 59 81 69 64 63 65 84 57 69 67 
+81 68 59 78 60 74 60 68 61 68 58 75 57 65 54 70 85 66 
+60 74 84 67 70 64 67 72 78 75 46 56 69 71 52 75 55 78 
+67 74 71 74 53 69 78 57 65 69 60 52 60 67 77 59 50 68 
+61 85 61 71 60 47 79 48 63 67 60 71 50 76 56 83 61 56 
+60 74 69 64 76 66 57 61 76 76 72 65 68 81 66 66 69 79 
+72 44 61 73 66 67 68 56 70 68 56 58 58 64 56 59 70 60 
+59 57 54 67 68 52 59 68 66 64 77 68 59 71 73 69 49 80 
+59 74 48 69 68 75 58 60 59 63 45 66 56 79 71 56 57 73 
+67 67 54 57 81 91 47 68 63 66 75 63 76 62 74 68 72 74 
+53 84 43 59 51 76 86 76 57 52 90 63 70 78 63 46 74 72 
+46 64 57 60 88 66 68 54 57 66 60 72 79 72 41 60 54 76 
+51 50 69 59 59 53 61 71 65 63 68 76 70 78 68 73 51 81 
+65 50 67 70 68 73 51 70 58 62 69 63 69 67 63 79 73 70 
+60 62 65 69 63 90 66 65 63 62 53 73 62 79 61 67 50 62 
+61 72 82 67 66 91 59 77 83 67 69 70 69 59 77 78 71 50 
+76 52 63 74 50 66 74 68 62 62 66 69 56 67 67 65 69 60 
+63 64 77 66 59 52 72 81 56 61 63 59 66 85 87 70 62 51 
+51 52 54 65 59 61 60 66 69 83 77 67 70 64 63 65 65 84 
+61 49 76 72 65 63 67 52 83 67 65 59 60 74 54 64 76 69 
+66 63 66 64 75 66 66 62 49 67 74 60 68 58 69 78 75 76 
+63 65 66 59 61 61 67 73 66 83 79 74 70 74 63 73 69 67 
+59 59 73 69 62 74 66 75 77 62 72 71 69 62 54 60 74 65 
+64 59 58 75 74 58 77 63 84 57 87 59 70 59 70 64 74 60 
+58 64 47 63 61 79 70 65 59 79 60 76 69 53 64 62 65 75 
+57 78 75 64 61 64 81 53 64 56 78 66 69 84 74 57 71 66 
+68 64 52 58 69 77 56 69 58 59 62 83 64 84 63 57 83 72 
+69 71 75 57 71 65 67 59 79 66 93 62 91 54 57 55 87 72 
+62 53 60 75 51 61 71 72 58 59 54 89 65 78 65 73 53 70 
+72 70 69 73 67 53 51 58 78 72 59 68 71 53 55 61 68 57 
+78 68 51 52 61 54 71 76 73 88 71 64 74 55 64 75 71 58 
+66 73 57 69 69 69 79 63 71 61 72 43 79 63 79 68 56 58 
+67 74 73 72 79 59 65 75 61 50 60 56 71 66 74 66 76 68 
+60 79 66 68 64 62 68 72 62 65 61 60 77 55 56 72 56 62 
+38 44 65 51 57 69 68 63 76 64 69 76 64 66 58 57 91 62 
+76 69 64 68 68 74 76 56 70 68 66 70 60 51 84 73 64 69 
+65 62 59 63 78 78 63 54 74 74 66 43 54 66 81 71 69 51 
+56 76 62 76 81 81 62 65 55 63 67 83 62 63 83 63 63 78 
+46 67 66 60 62 71 76 66 90 78 69 68 62 64 60 51 58 75 
+32 85 70 73 48 58 67 66 74 52 54 72 66 48 68 75 76 74 
+58 66 70 71 64 77 82 57 56 59 74 65 65 77 68 63 58 73 
+69 63 62 61 77 61 50 53 64 78 64 77 75 65 66 86 83 52 
+64 54 70 53 72 58 73 70 74 68 75 72 62 68 62 69 67 77 
+58 82 77 48 57 81 63 90 69 71 77 72 75 63 62 54 69 44 
+62 58 70 65 62 61 54 55 60 69 53 64 60 72 53 58 55 61 
+66 49 65 58 78 65 39 68 67 69 67 80 79 73 73 69 70 65 
+50 72 46 69 63 65 63 71 56 40 47 76 75 61 76 65 55 65 
+61 80 63 69 77 74 64 79 79 68 69 67 64 80 54 50 74 75 
+65 69 70 59 56 67 65 70 66 56 69 51 57 78 71 73 46 64 
+66 55 76 74 71 79 60 67 66 69 48 63 76 68 82 72 64 72 
+61 61 53 68 70 44 72 77 56 66 71 45 67 53 49 62 69 61 
+75 51 46 75 77 71 67 72 82 68 66 83 79 47 74 65 39 67 
+81 65 64 68 80 77 76 57 67 78 49 71 72 90 66 56 50 81 
+55 73 74 64 74 56 69 59 68 72 76 75 59 63 60 71 66 77 
+44 52 56 55 55 64 65 50 66 53 69 66 47 62 57 65 57 65 
+80 68 48 75 63 53 67 67 59 66 49 57 69 48 70 71 64 91 
+71 61 83 72 68 66 62 73 51 73 75 59 62 85 65 62 64 72 
+80 76 63 88 64 73 52 41 54 51 61 77 64 74 84 79 46 77 
+68 62 55 76 63 60 74 31 83 52 58 45 79 67 54 67 81 71 
+75 68 72 56 60 83 56 77 63 70 71 55 70 75 59 63 60 49 
+71 42 54 59 53 64 75 83 70 64 58 59 54 89 66 79 80 66 
+77 58 72 70 59 66 70 58 69 61 78 82 77 71 71 73 61 70 
+60 76 61 64 66 51 70 48 78 66 70 66 67 55 63 67 53 64 
+68 66 64 66 69 67 85 57 86 71 80 85 80 54 65 66 67 54 
+60 69 56 63 60 52 54 53 75 58 56 58 56 76 79 60 80 62 
+66 65 63 59 79 59 62 66 67 74 57 64 76 64 58 79 81 70 
+80 67 67 60 49 64 71 64 79 75 47 75 41 72 65 61 76 65 
+72 64 78 70 71 66 71 57 68 88 82 59 69 66 67 63 55 39 
+72 70 73 80 89 68 74 69 61 75 71 63 76 53 76 62 66 76 
+50 72 80 48 44 63 73 65 75 65 64 72 68 69 63 73 55 67 
+62 68 61 80 73 61 71 82 60 85 50 76 54 72 64 64 63 78 
+64 75 61 78 71 61 88 69 72 55 64 74 65 58 61 69 71 84 
+89 64 53 75 60 72 61 72 69 63 82 64 66 73 67 76 68 62 
+80 74 66 68 55 69 63 67 59 65 71 80 74 67 59 91 72 67 
+79 61 61 70 55 70 79 86 70 69 71 66 67 76 80 68 64 47 
+
+FDAC settings used for chip 0:
+5 4 4 4 2 4 2 2 4 4 3 2 2 4 4 3 5 5 
+4 4 4 4 4 3 4 2 2 4 4 4 3 4 4 4 4 4 
+4 4 5 2 2 2 4 4 4 4 4 2 2 2 2 4 3 3 
+4 2 4 2 4 2 4 4 4 4 2 4 4 4 2 2 2 3 
+4 2 4 4 2 4 2 4 2 5 3 2 5 3 4 5 4 2 
+4 4 4 2 3 2 4 4 4 2 4 3 4 4 4 3 5 2 
+3 4 5 2 2 4 2 2 4 4 4 3 4 2 2 4 4 4 
+2 4 2 2 4 2 4 2 2 4 2 2 2 2 4 4 2 4 
+4 4 3 2 2 4 2 4 4 1 2 2 3 3 3 4 2 4 
+4 4 4 2 4 4 2 2 2 4 4 4 4 4 2 4 5 5 
+4 2 4 4 2 2 2 4 4 2 4 2 5 4 2 4 4 4 
+3 2 4 4 4 2 4 4 4 4 4 2 4 3 2 4 4 4 
+2 4 4 4 2 4 4 2 2 2 3 2 3 4 4 4 3 4 
+4 4 4 2 2 2 2 2 2 4 2 4 2 4 3 4 2 5 
+2 4 4 2 4 4 4 2 2 2 4 2 4 4 3 4 4 4 
+2 2 2 4 4 2 2 2 2 2 4 2 4 4 2 4 4 3 
+2 1 2 2 2 1 4 5 2 2 4 4 4 2 2 4 4 3 
+4 4 4 4 4 2 2 4 4 3 4 4 4 4 2 2 5 3 
+2 2 2 2 4 4 2 2 4 2 4 2 2 4 2 4 4 4 
+2 4 2 2 2 2 4 4 4 4 2 1 4 4 3 4 4 4 
+4 4 4 4 2 2 4 4 3 4 2 4 2 3 4 2 3 5 
+4 1 2 4 4 2 4 2 2 2 4 4 2 2 4 4 2 5 
+2 4 4 4 2 4 2 4 2 2 4 2 2 4 4 2 4 3 
+4 2 4 1 2 4 4 4 4 4 4 2 4 3 4 3 4 3 
+2 4 4 4 4 2 1 2 2 4 2 4 4 3 4 3 2 3 
+2 4 2 2 4 4 4 2 4 4 4 4 2 2 2 2 4 4 
+4 4 4 2 4 1 4 4 4 2 2 2 5 4 4 3 4 4 
+2 4 2 4 4 2 4 2 4 4 2 4 3 4 4 4 2 3 
+4 5 2 2 4 4 4 2 4 4 4 4 4 4 4 2 5 4 
+4 2 2 2 4 2 4 2 4 4 3 2 4 4 3 5 4 4 
+2 2 2 4 2 4 4 2 4 2 2 2 4 4 4 3 3 4 
+4 4 2 2 4 2 2 2 4 4 2 2 3 3 4 3 4 4 
+3 4 2 2 2 4 3 1 4 2 4 2 4 4 2 4 4 3 
+2 2 4 4 2 4 4 4 4 2 4 2 2 4 5 3 2 3 
+4 2 4 1 2 4 2 4 4 4 4 2 2 2 2 5 3 2 
+2 4 2 4 1 2 4 4 2 2 2 2 5 4 3 5 4 3 
+3 4 4 2 2 2 4 4 2 4 4 4 4 4 2 4 3 3 
+4 2 2 2 4 2 4 4 4 2 2 2 4 2 4 5 4 5 
+4 2 4 2 4 4 4 2 4 4 3 4 2 4 2 4 3 4 
+2 4 2 2 4 4 3 2 2 2 2 4 2 4 2 4 2 3 
+3 2 4 4 2 2 4 1 2 4 2 4 2 2 4 4 4 3 
+1 2 2 1 4 4 4 2 4 4 4 4 3 4 4 4 4 3 
+2 4 4 2 4 2 2 4 4 4 4 4 4 4 4 4 4 3 
+2 2 1 2 4 2 1 2 4 4 4 4 2 4 5 4 5 4 
+4 4 4 4 4 4 4 2 4 2 2 4 4 2 2 4 3 3 
+2 4 4 4 4 2 2 4 4 4 4 4 4 4 2 2 3 3 
+3 4 4 2 2 4 4 4 4 2 2 2 2 4 2 3 4 4 
+2 2 2 4 2 2 4 4 2 3 4 2 3 4 4 4 4 2 
+4 4 2 4 2 2 2 4 2 4 3 4 4 4 5 4 3 3 
+4 2 2 2 2 1 4 4 4 2 2 2 3 4 4 4 4 3 
+4 4 4 4 4 2 2 2 3 2 4 4 4 4 3 4 4 4 
+4 2 2 4 4 1 2 4 2 4 3 4 4 4 4 4 4 2 
+2 3 2 2 2 4 2 2 2 2 4 4 2 4 3 2 2 4 
+2 2 2 2 4 4 4 2 4 4 2 2 4 4 4 4 4 4 
+4 4 4 4 4 2 4 2 2 5 4 2 4 4 3 2 4 4 
+2 2 4 4 2 4 4 4 4 4 2 2 4 2 5 4 4 4 
+4 2 4 4 2 4 4 4 2 4 1 4 4 2 4 4 3 4 
+4 2 4 4 4 4 2 2 4 4 2 4 2 2 4 2 2 3 
+4 2 2 4 4 2 2 4 1 2 2 3 4 4 2 4 4 4 
+2 2 4 2 2 4 4 4 2 2 2 4 2 2 4 2 3 4 
+4 4 4 2 4 4 2 2 4 2 4 4 2 4 2 2 4 4 
+4 2 4 4 2 2 1 2 2 4 4 2 4 2 2 4 4 4 
+4 4 2 4 2 4 4 2 4 2 2 2 4 4 4 4 2 2 
+2 2 4 4 2 4 2 4 4 2 2 2 2 4 3 4 4 4 
+2 2 4 2 2 2 4 4 4 4 4 2 5 4 2 4 5 3 
+2 2 4 2 4 4 4 2 4 2 4 2 2 4 2 5 4 4 
+4 4 4 4 4 2 4 2 4 4 2 1 4 4 4 2 2 4 
+2 4 2 2 4 2 2 4 2 4 2 2 4 2 2 4 4 2 
+4 2 4 4 4 2 4 1 4 4 2 4 4 4 2 2 3 2 
+4 2 2 4 2 2 2 2 4 4 4 2 2 4 1 4 4 2 
+4 2 4 4 3 2 4 2 2 2 1 2 4 2 3 4 4 4 
+2 2 2 2 2 2 2 4 4 1 4 4 4 2 4 4 4 4 
+4 2 2 4 4 4 3 2 4 2 4 2 4 2 2 4 4 4 
+4 4 2 4 3 2 2 4 4 2 4 4 4 4 4 4 2 2 
+1 1 4 2 4 4 2 4 2 4 4 2 3 2 4 2 4 4 
+1 2 2 2 1 2 4 2 4 2 4 4 2 4 4 4 4 1 
+4 2 1 2 4 4 4 4 4 1 4 4 4 4 4 4 4 4 
+4 4 4 2 2 2 4 4 4 2 4 4 2 4 4 4 4 4 
+5 2 4 2 2 4 2 4 2 4 2 4 4 4 4 2 4 2 
+2 4 4 4 2 2 2 2 2 4 4 4 2 4 4 2 4 2 
+2 2 2 1 2 4 1 4 2 4 2 2 4 4 4 4 4 4 
+4 4 4 2 1 2 4 4 4 1 4 4 2 2 4 4 3 3 
+4 4 4 4 2 2 4 4 4 2 2 2 2 2 3 2 2 4 
+2 1 2 2 4 2 2 1 2 2 2 4 2 2 4 4 3 4 
+4 2 2 2 4 4 4 4 4 4 4 4 3 1 2 2 4 4 
+2 4 4 4 2 2 4 4 2 4 2 4 4 2 2 2 1 2 
+2 1 2 2 2 1 2 1 2 2 2 4 2 2 4 2 4 4 
+4 2 4 2 1 2 2 2 1 2 4 4 2 2 3 2 4 2 
+2 1 2 4 1 4 4 2 2 4 2 2 2 4 4 2 2 4 
+4 4 2 4 4 1 4 1 4 2 2 2 4 4 2 4 4 4 
+4 4 4 2 4 1 2 4 2 4 4 2 2 4 4 1 4 2 
+4 2 2 2 4 2 2 2 1 2 2 2 4 2 4 2 4 4 
+4 2 2 4 1 4 4 4 2 4 4 2 2 4 2 4 4 2 
+4 2 1 4 2 2 4 2 4 2 2 1 1 2 4 4 4 2 
+2 4 2 2 2 4 2 2 2 1 4 4 2 4 2 2 4 4 
+1 4 2 2 2 4 4 2 4 4 2 2 2 4 1 4 4 4 
+4 2 4 2 2 2 4 4 4 2 4 2 4 2 2 4 4 4 
+4 4 4 2 1 4 2 4 2 4 2 2 4 4 2 4 4 2 
+2 2 1 4 4 4 4 4 4 4 1 4 4 4 2 4 2 2 
+2 1 2 1 2 4 2 4 1 2 2 2 2 2 2 2 4 2 
+2 2 4 2 2 2 2 2 2 4 2 4 2 4 2 4 4 4 
+2 2 2 4 4 2 2 4 4 2 4 4 2 2 4 2 2 2 
+2 2 1 1 4 4 2 2 4 2 2 1 4 2 2 4 2 4 
+2 4 4 4 4 2 1 2 2 4 1 4 4 2 4 1 2 2 
+4 2 2 4 2 1 4 2 1 2 2 2 4 4 4 2 4 4 
+4 1 4 4 2 2 2 4 2 2 2 4 4 2 4 2 4 2 
+2 2 4 4 2 2 2 2 4 2 4 4 4 4 4 2 4 4 
+2 2 2 2 2 2 4 1 4 4 4 1 4 2 2 4 4 2 
+1 2 2 4 4 2 4 2 4 4 4 2 4 4 4 4 4 4 
+4 1 4 4 4 2 2 2 2 2 2 4 4 2 2 1 4 4 
+4 4 2 2 2 4 4 2 4 4 4 2 2 2 4 2 4 4 
+4 2 4 2 2 2 2 4 2 2 2 1 2 4 4 4 2 2 
+4 2 4 2 2 1 4 1 4 2 4 4 4 2 4 2 5 4 
+2 2 2 2 1 4 4 1 2 4 4 4 4 4 2 2 4 2 
+4 4 1 2 2 1 4 2 1 2 2 2 2 2 4 2 4 4 
+2 4 2 2 4 4 2 1 2 4 4 2 4 2 4 4 2 2 
+2 2 4 4 4 4 2 2 4 2 2 2 4 2 3 4 2 2 
+4 2 4 2 2 4 4 4 4 2 2 2 4 2 4 2 4 2 
+2 2 1 1 2 2 4 4 4 4 2 2 1 2 4 2 4 2 
+2 4 2 4 2 4 4 2 4 1 2 2 4 4 4 2 4 2 
+1 2 2 4 4 2 2 2 2 2 2 4 2 2 4 2 4 4 
+2 2 2 4 4 2 4 4 4 2 4 2 1 2 2 4 4 2 
+2 4 4 4 4 2 4 2 4 2 4 1 2 2 2 2 4 4 
+4 1 2 2 2 4 4 4 2 2 2 4 2 2 2 4 4 4 
+4 2 2 4 4 2 4 1 4 2 4 2 2 2 2 2 2 4 
+4 2 2 2 2 4 4 4 2 2 2 4 4 4 2 4 4 4 
+3 2 2 2 2 2 2 1 2 2 4 4 2 2 2 4 3 2 
+2 2 4 4 2 4 4 4 5 4 2 4 4 4 2 4 2 4 
+2 4 2 2 4 4 4 4 4 4 2 2 2 4 2 2 4 2 
+2 2 2 4 4 4 2 2 4 2 2 2 2 2 4 2 4 4 
+4 4 2 4 2 4 4 4 2 4 4 4 2 2 2 4 2 4 
+2 4 2 2 4 4 1 2 4 2 4 2 4 4 3 4 2 2 
+2 4 2 4 2 4 4 4 2 2 4 1 2 4 2 2 1 2 
+1 4 4 4 2 4 4 2 4 4 4 2 2 2 4 4 4 4 
+4 2 4 1 4 4 3 2 4 2 4 4 4 4 4 4 4 4 
+2 2 2 2 2 2 4 2 4 4 4 2 4 4 3 4 4 2 
+4 2 2 2 4 4 4 4 4 4 4 4 4 1 4 4 4 4 
+4 2 2 2 2 2 4 2 4 2 2 1 4 4 3 4 4 4 
+2 4 3 4 2 4 2 2 2 4 2 2 4 2 4 2 3 3 
+4 2 4 2 2 2 4 4 4 2 4 4 4 2 2 2 4 4 
+4 2 2 2 4 4 2 4 4 2 2 2 2 2 4 4 4 2 
+4 2 4 4 4 4 2 4 4 4 4 4 4 2 2 4 2 4 
+4 4 4 4 2 4 4 2 2 2 4 4 5 2 4 4 2 4 
+4 4 2 4 4 2 4 4 2 4 2 4 2 4 4 2 4 2 
+2 4 2 4 2 4 4 4 2 4 2 2 2 4 2 4 2 2 
+2 4 2 2 2 3 4 4 4 1 2 1 4 4 4 4 4 4 
+2 2 4 2 2 4 4 2 2 4 2 4 3 4 4 4 4 3 
+4 4 2 4 2 4 4 4 4 2 2 4 2 2 2 4 3 4 
+4 4 4 4 4 4 4 4 5 2 4 2 4 4 4 4 4 3 
+4 2 4 2 2 4 2 2 4 2 4 4 4 2 4 4 2 2 
+2 2 4 4 4 2 2 4 4 2 4 4 4 2 4 4 5 4 
+4 2 2 2 4 4 4 4 4 2 2 2 2 4 3 2 3 5 
+4 4 2 4 4 2 2 2 4 4 2 4 4 2 4 2 4 2 
+2 2 4 2 2 2 4 2 1 1 4 4 2 1 4 4 4 2 
+2 4 4 2 4 2 2 4 2 2 4 2 2 2 4 4 2 2 
+2 2 2 2 2 2 2 2 2 4 2 2 4 2 4 2 4 4 
+2 2 4 2 2 2 4 4 4 1 4 2 4 2 2 4 4 2 
+4 1 2 2 2 2 2 4 2 2 2 2 4 4 2 4 4 2 
+4 4 1 2 4 4 4 4 4 4 4 4 4 4 2 4 4 4 
+4 4 4 1 2 2 4 4 4 4 4 1 4 4 2 1 4 1 
+
+
+FE error summary for chip 0:
+
+Potential buffer Overflows: 0
+Illegal column address': 0
+Illegal row address': 0
+Instances of missing EoE: 0
+Unsequential LV1s: 0
+Unsequential BCIDs: 0
+Unmatched BCIDs: 0
+Trigger FIFO Hamming code errors: 0
+Parity upset in register: 0
+Parity flags in EoEs: 0
+Parity upsets in hits: 0
+Parity upsets in EoEs: 0
+Bit flip warnings: 0

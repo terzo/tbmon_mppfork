@@ -1,0 +1,30 @@
+===========================================================
+There was a crash.
+This is the entire stack trace of all threads:
+===========================================================
+#0  0x00007fbe3645ec8e in __libc_waitpid (pid=<optimized out>, stat_loc=0x7fffe82d0380, options=0) at ../sysdeps/unix/sysv/linux/waitpid.c:32
+#1  0x00007fbe363e429e in do_system (line=0x280a420 "/opt/root/5.34/etc/gdb-backtrace.sh 22893 1>&2") at ../sysdeps/posix/system.c:149
+#2  0x00007fbe39aac337 in TUnixSystem::StackTrace() () from /opt/root/5.34/lib/libCore.so.5.34
+#3  0x00007fbe39aaec13 in TUnixSystem::DispatchSignals(ESignals) () from /opt/root/5.34/lib/libCore.so.5.34
+#4  <signal handler called>
+#5  0x0000000000498fbd in EuBuildTrack::initRun(TbConfig&) ()
+#6  0x000000000043ff5f in Looper::initRun(TbConfig&) ()
+#7  0x00000000004405f3 in Looper::loop(TbConfig&) ()
+#8  0x000000000044a566 in TbConfig::loop() ()
+#9  0x0000000000420220 in main ()
+===========================================================
+
+
+The lines below might hint at the cause of the crash.
+If they do not help you then please submit a bug report at
+http://root.cern.ch/bugs. Please post the ENTIRE stack trace
+from above as an attachment in addition to anything else
+that might help us fixing this issue.
+===========================================================
+#5  0x0000000000498fbd in EuBuildTrack::initRun(TbConfig&) ()
+#6  0x000000000043ff5f in Looper::initRun(TbConfig&) ()
+#7  0x00000000004405f3 in Looper::loop(TbConfig&) ()
+#8  0x000000000044a566 in TbConfig::loop() ()
+#9  0x0000000000420220 in main ()
+===========================================================
+

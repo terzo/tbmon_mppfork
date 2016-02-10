@@ -1,0 +1,46 @@
+#include "pixelmasker.h"
+
+/**
+ * loops over all event.rawHits and saves the not masked ones into
+ * event.hits
+ */
+void PixelMasker::buildEvent(Event &event, map<int, Event>&, TbConfig &config) {
+
+	// loop over all event.rawHits
+	for (vector<PllHit*>::iterator it = event.rawHits.begin();
+			it != event.rawHits.end(); it++) {
+
+		const DUT* dut = config.getDut((*it)->iden);
+		//Extract lv1 configuration from config
+		int lv1Min = dut->lv1Min;
+		int lv1Max = dut->lv1Max;
+		// if this is supposed to be consistend with the if (lv1 < lv1Max...
+		// line this needs do be lv1Min <= lv1 <= lv1Max
+		TBALOG(kDEBUG3) << "Cuts from DUT calib: " << lv1Min << " <= lv1 <= "
+				<< lv1Max << endl;
+		int col((*it)->col), row((*it)->row);
+		int lv1((*it)->lv1);
+		bool masked = false;
+		// filter hits with lvl1 out of range
+		if ((lv1 > lv1Max) || (lv1 < lv1Min)) {
+			continue;
+		}
+		// check if hit is in mask
+		for (vector<pair<int, int> >::iterator mm = event.dut->masks.begin();
+				mm != event.dut->masks.end(); mm++) {
+			
+			// exchanged col and row in order to make this consistent
+			// after correcting col and row in DUT::addMasks
+			if ((*mm).first == col and (*mm).second == row) {
+				masked = true;
+				break;
+			}
+		}
+		
+		// if not masked save pointer event.rawHits pointer in event.hits
+		if (not masked) {
+			event.hits.push_back((*it));
+		}
+	}
+}
+
